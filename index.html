@@ -892,7 +892,14 @@
 
         <div class="contact-content">
           <div class="contact-form-container">
-            <form id="contactForm" class="contact-form">
+            <form
+              id="contactForm"
+              class="contact-form"
+              name="contact"
+              method="POST"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+            >
               <div class="form-group">
                 <label for="name">Name</label>
                 <input
