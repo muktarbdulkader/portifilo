@@ -97,8 +97,16 @@ animatedElements.forEach((el) => {
 const contactForm = document.getElementById("contactForm");
 // If the page is opened via file:// (no origin) or origin is 'null', fall back to localhost
 const DEFAULT_API = "http://localhost:3000";
+// Allow an explicit API URL to be injected by the hosting environment or an
+// inline script (e.g. window.API_URL = 'https://portifilo.onrender.com').
+// Otherwise prefer the current origin when served from the same host, and
+// finally fall back to localhost for local development.
 const API_URL =
-  window.location && window.location.origin && window.location.origin !== "null"
+  typeof window !== "undefined" && window.API_URL
+    ? window.API_URL
+    : window.location &&
+      window.location.origin &&
+      window.location.origin !== "null"
     ? window.location.origin
     : DEFAULT_API;
 

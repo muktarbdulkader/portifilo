@@ -1110,6 +1110,21 @@
       </div>
     </footer>
 
+    <script>
+      // If the frontend is hosted separately (e.g. on Netlify), set the API
+      // base URL so calls go to the Render backend. Change this value only if
+      // you deploy the backend elsewhere.
+      (function () {
+        try {
+          var renderBackend = "https://portifilo.onrender.com";
+          if (window && window.location && window.location.origin !== renderBackend) {
+            window.API_URL = renderBackend;
+          }
+        } catch (e) {
+          /* noop */
+        }
+      })();
+    </script>
     <script src="script.js"></script>
   </body>
 </html>
