@@ -597,3 +597,151 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Floating "Let's Talk" CTA
+(function () {
+  // Prevent duplicate insertion
+  if (document.querySelector(".floating-cta")) return;
+
+  // Create CTA element
+  const cta = document.createElement("a");
+  cta.href = "#contact";
+  cta.className = "floating-cta pulse-glow hide";
+  cta.setAttribute("aria-label", "Let's Talk");
+  cta.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    <span>Let's Talk</span>
+  `;
+
+  // Instead of scrolling, open a contact modal with phone & telegram
+  cta.addEventListener("click", function (e) {
+    e.preventDefault();
+    openContactModal();
+  });
+
+  document.body.appendChild(cta);
+
+  // Contact modal creation and behavior
+  function openContactModal() {
+    if (document.querySelector('.contact-modal-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'contact-modal-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'contact-modal';
+
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '✕';
+    closeBtn.addEventListener('click', closeModal);
+
+    const title = document.createElement('h3');
+    title.textContent = 'Contact Muktar';
+
+    const nameItem = document.createElement('div');
+    nameItem.className = 'contact-item';
+    nameItem.innerHTML = `<strong>Name</strong><span>Muktar</span>`;
+
+    const phoneNumber = '+251916662982';
+    const phoneItem = document.createElement('div');
+    phoneItem.className = 'contact-item';
+    phoneItem.innerHTML = `<strong>Phone</strong><span>${phoneNumber}</span>`;
+
+    const tgLink = 'https://t.me/MuktiAbdu';
+    const tgItem = document.createElement('div');
+    tgItem.className = 'contact-item';
+    tgItem.innerHTML = `<strong>Telegram</strong><span>@MuktiAbdu</span>`;
+
+    const actions = document.createElement('div');
+    actions.className = 'contact-actions';
+
+    const callAnchor = document.createElement('a');
+    callAnchor.className = 'call';
+    callAnchor.href = `tel:${phoneNumber}`;
+    callAnchor.textContent = 'Call';
+
+    const tgAnchor = document.createElement('a');
+    tgAnchor.className = 'tg';
+    tgAnchor.href = tgLink;
+    tgAnchor.target = '_blank';
+    tgAnchor.rel = 'noopener noreferrer';
+    tgAnchor.textContent = 'Open Telegram';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy';
+    copyBtn.textContent = 'Copy Number';
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(phoneNumber);
+        // small toast feedback
+        showToast('Phone number copied to clipboard', 'success');
+      } catch (err) {
+        showToast('Copy failed. Please copy manually.', 'error');
+      }
+    });
+
+    actions.appendChild(callAnchor);
+    actions.appendChild(tgAnchor);
+    actions.appendChild(copyBtn);
+
+    modal.appendChild(closeBtn);
+    modal.appendChild(title);
+    modal.appendChild(nameItem);
+    modal.appendChild(phoneItem);
+    modal.appendChild(tgItem);
+    modal.appendChild(actions);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // show with transition
+    requestAnimationFrame(() => overlay.classList.add('show'));
+
+    // close on overlay click (but not when clicking inside modal)
+    overlay.addEventListener('click', (ev) => {
+      if (ev.target === overlay) closeModal();
+    });
+
+    // close on Esc
+    function onKey(e) {
+      if (e.key === 'Escape') closeModal();
+    }
+    document.addEventListener('keydown', onKey);
+
+    function closeModal() {
+      overlay.classList.remove('show');
+      document.removeEventListener('keydown', onKey);
+      setTimeout(() => overlay.remove(), 200);
+    }
+  }
+
+  // Hide CTA when contact section is visible
+  const contact = document.getElementById("contact");
+  if (contact && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            cta.classList.add("hide");
+          } else if (window.scrollY > 120) {
+            cta.classList.remove("hide");
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    io.observe(contact);
+  }
+
+  // Also hide at top of page, show after scrolling down
+  window.addEventListener("scroll", () => {
+    if (window.scrollY < 120) {
+      cta.classList.add("hide");
+    } else if (!contact || (contact && !cta.classList.contains("hide"))) {
+      cta.classList.remove("hide");
+    }
+  });
+})();
