@@ -48,6 +48,23 @@
       </p>
       <input id="token" placeholder="paste admin token here" />
       <button id="load">Load Messages</button>
+      <div style="margin-top: 18px">
+        <h2>Send Email</h2>
+        <p style="color: #9aa7bf">
+          Use this form to send emails using the configured SMTP credentials.
+        </p>
+        <div style="display: grid; gap: 8px; max-width: 680px">
+          <input id="emailTo" placeholder="to@example.com" />
+          <input id="emailSub" placeholder="Subject" />
+          <textarea
+            id="emailBody"
+            placeholder="Message text"
+            style="min-height: 120px"
+          ></textarea>
+          <button id="sendEmail">Send Email</button>
+        </div>
+      </div>
+
       <div id="list"></div>
     </div>
 
@@ -76,6 +93,32 @@
           alert("Error loading messages");
         }
       });
+
+      document
+        .getElementById("sendEmail")
+        .addEventListener("click", async () => {
+          const token = document.getElementById("token").value.trim();
+          if (!token) return alert("Enter admin token first");
+          const to = document.getElementById("emailTo").value.trim();
+          const subject = document.getElementById("emailSub").value.trim();
+          const text = document.getElementById("emailBody").value.trim();
+          if (!to || !subject || !text) return alert("fill all fields");
+          try {
+            const res = await fetch("/api/admin/send-email", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "x-admin-token": token,
+              },
+              body: JSON.stringify({ to, subject, text }),
+            });
+            const data = await res.json();
+            if (!res.ok) return alert("Send failed: " + (data && data.message));
+            alert("Email sent");
+          } catch (e) {
+            alert("Error sending email");
+          }
+        });
     </script>
   </body>
 </html>

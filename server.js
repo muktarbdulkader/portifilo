@@ -222,6 +222,50 @@ app.get("/api/admin/messages", (req, res) => {
   res.json({ success: true, count: messages.length, messages });
 });
 
+// Admin: send arbitrary email (protected)
+app.post("/api/admin/send-email", async (req, res) => {
+  const token = req.headers["x-admin-token"];
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected || token !== expected) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { to, subject, text, html } = req.body || {};
+  if (!to || !subject || (!text && !html)) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Missing fields: to, subject and text/html required",
+      });
+  }
+
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER || "portfolio@example.com",
+      to,
+      subject,
+      text,
+      html,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return res.json({ success: true, message: "Email sent", info });
+  } catch (err) {
+    console.error(
+      "Admin send-email error:",
+      err && err.message ? err.message : err
+    );
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to send email",
+        error: err && err.message,
+      });
+  }
+});
+
 // Get projects data
 app.get("/api/projects", (req, res) => {
   const projects = [
