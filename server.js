@@ -24,13 +24,38 @@ const contactLimiter = rateLimit({
 });
 
 // Email configuration
+// Sanitize env values (remove quotes and spaces for Gmail App Password)
+const EMAIL_USER = (process.env.EMAIL_USER || "").replace(/^"|"$/g, "").trim();
+const EMAIL_PASS = (process.env.EMAIL_PASS || "")
+  .replace(/^"|"$/g, "")
+  .replace(/\s+/g, "")
+  .trim();
+
+// Prefer explicit SMTP configuration for Gmail (works well with App Passwords)
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_USER || "your-email@gmail.com",
-    pass: process.env.EMAIL_PASS || "your-app-password",
+    user: EMAIL_USER || "your-email@gmail.com",
+    pass: EMAIL_PASS || "your-app-password",
   },
 });
+
+// Verify SMTP configuration at startup
+transporter
+  .verify()
+  .then(() => {
+    console.log("Email transporter verified (SMTP ready)");
+  })
+  .catch((err) => {
+    console.warn(
+      "Warning: Email transporter verification failed.\n" +
+        "Check EMAIL_USER and EMAIL_PASS (App Password required for Gmail).\n" +
+        `Sanitized EMAIL_USER='${EMAIL_USER ? EMAIL_USER : "(not set)"}'`,
+      err && err.message ? err.message : err
+    );
+  });
 
 // In-memory storage for messages (in production, use a database)
 const DATA_FILE = path.join(__dirname, "messages.json");
@@ -45,7 +70,6 @@ try {
     const parsed = JSON.parse(raw || "[]");
     if (Array.isArray(parsed)) {
       messages = parsed;
-      // set counter to max id + 1
       const maxId = messages.reduce((max, m) => (m.id > max ? m.id : max), 0);
       messageIdCounter = maxId + 1;
       console.log(`Loaded ${messages.length} messages from messages.json`);
@@ -66,7 +90,7 @@ app.get("/api/messages", (req, res) => {
   });
 });
 
-// helper: sanitize simple text (escape html special chars)
+// helper: sanitize simple text
 function escapeHtml(str) {
   if (!str || typeof str !== "string") return "";
   return str
@@ -82,12 +106,10 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
     let { name, email, message } = req.body;
 
-    // Trim inputs
     name = (name || "").trim();
     email = (email || "").trim();
     message = (message || "").trim();
 
-    // Validation
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -95,7 +117,6 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       });
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -104,11 +125,9 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       });
     }
 
-    // Sanitize before storing (so displayed messages can't inject HTML)
     const safeMessage = escapeHtml(message);
     const safeName = escapeHtml(name);
 
-    // Store message
     const newMessage = {
       id: messageIdCounter++,
       name: safeName,
@@ -119,7 +138,6 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     };
     messages.push(newMessage);
 
-    // Persist messages to file atomically (write temp + rename)
     const tempFile = DATA_FILE + ".tmp";
     fs.writeFile(tempFile, JSON.stringify(messages, null, 2), (err) => {
       if (err) {
@@ -135,49 +153,73 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
       }
     });
 
-    // Send email notification (optional - configure with real credentials)
-    try {
-      const mailOptions = {
-        from: process.env.EMAIL_USER || "portfolio@example.com",
-        to: process.env.EMAIL_USER || "muktar@example.com",
-        subject: `New Portfolio Contact from ${name}`,
-        html: `
-                    <div style="font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
-                        <div style="background: white; padding: 30px; border-radius: 8px;">
-                            <h2 style="color: #4F46E5; margin-bottom: 20px;">New Contact Form Submission</h2>
-                            <div style="margin-bottom: 15px;">
-                                <strong style="color: #666;">Name:</strong>
-                                <p style="margin: 5px 0; color: #333;">${name}</p>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <strong style="color: #666;">Email:</strong>
-                                <p style="margin: 5px 0; color: #333;">${email}</p>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <strong style="color: #666;">Message:</strong>
-                                <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">${message}</p>
-                            </div>
-                            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                            <p style="color: #999; font-size: 12px;">Received at: ${new Date().toLocaleString()}</p>
-                        </div>
-                    </div>
-                `,
-        replyTo: email,
-      };
-
-      await transporter.sendMail(mailOptions);
-    } catch (emailError) {
-      console.log(
-        "Email sending failed (this is OK in development):",
-        emailError.message
-      );
-    }
-
     res.json({
       success: true,
       message: `Thank you, ${name}! Your message has been received. I'll get back to you at ${email} soon.`,
       data: newMessage,
+      emailQueued: true,
     });
+
+    (async (msg) => {
+      try {
+        const mailOptions = {
+          from: EMAIL_USER,
+          to: EMAIL_USER,
+          subject: `New Portfolio Contact from ${msg.name}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
+                <div style="background: white; padding: 30px; border-radius: 8px;">
+                    <h2 style="color: #4F46E5; margin-bottom: 20px;">New Contact Form Submission</h2>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #666;">Name:</strong>
+                        <p style="margin: 5px 0; color: #333;">${msg.name}</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #666;">Email:</strong>
+                        <p style="margin: 5px 0; color: #333;">${msg.email}</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #666;">Message:</strong>
+                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">${
+                          msg.message
+                        }</p>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="color: #999; font-size: 12px;">Received at: ${new Date().toLocaleString()}</p>
+                </div>
+            </div>
+          `,
+          replyTo: msg.email,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(
+          "Background email sent:",
+          info && info.response ? info.response : info
+        );
+
+        const idx = messages.findIndex((m) => m.id === msg.id);
+        if (idx !== -1) {
+          messages[idx].status = "sent";
+          const tempFile2 = DATA_FILE + ".tmp";
+          fs.writeFile(tempFile2, JSON.stringify(messages, null, 2), (err) => {
+            if (err)
+              console.error("Failed to write temp messages file:", err.message);
+            else
+              fs.rename(tempFile2, DATA_FILE, (renameErr) => {
+                if (renameErr)
+                  console.error(
+                    "Failed to finalize messages file:",
+                    renameErr.message
+                  );
+              });
+          });
+        }
+      } catch (bgErr) {
+        const errMsg = (bgErr && bgErr.message) || String(bgErr);
+        console.warn("Background email sending failed:", errMsg);
+      }
+    })(newMessage);
   } catch (error) {
     console.error("Contact form error:", error);
     res.status(500).json({
@@ -188,7 +230,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
   }
 });
 
-// Get portfolio stats
+// Portfolio stats
 app.get("/api/stats", (req, res) => {
   res.json({
     success: true,
@@ -212,7 +254,7 @@ app.get("/api/stats", (req, res) => {
   });
 });
 
-// Admin API to get messages (protected by token)
+// Admin API
 app.get("/api/admin/messages", (req, res) => {
   const token = req.headers["x-admin-token"];
   const expected = process.env.ADMIN_TOKEN || "";
@@ -222,7 +264,6 @@ app.get("/api/admin/messages", (req, res) => {
   res.json({ success: true, count: messages.length, messages });
 });
 
-// Admin: send arbitrary email (protected)
 app.post("/api/admin/send-email", async (req, res) => {
   const token = req.headers["x-admin-token"];
   const expected = process.env.ADMIN_TOKEN || "";
@@ -232,111 +273,81 @@ app.post("/api/admin/send-email", async (req, res) => {
 
   const { to, subject, text, html } = req.body || {};
   if (!to || !subject || (!text && !html)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Missing fields: to, subject and text/html required",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Missing fields: to, subject and text/html required",
+    });
   }
 
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER || "portfolio@example.com",
-      to,
-      subject,
-      text,
-      html,
-    };
-
+    const mailOptions = { from: EMAIL_USER, to, subject, text, html };
     const info = await transporter.sendMail(mailOptions);
     return res.json({ success: true, message: "Email sent", info });
   } catch (err) {
-    console.error(
-      "Admin send-email error:",
-      err && err.message ? err.message : err
-    );
+    console.error("Admin send-email error:", err.message || err);
     return res
       .status(500)
       .json({
         success: false,
         message: "Failed to send email",
-        error: err && err.message,
+        error: err.message,
       });
   }
 });
 
-// Get projects data
+// Projects
 app.get("/api/projects", (req, res) => {
   const projects = [
     {
       id: 1,
       title: "Course Registration System",
-      description:
-        "A comprehensive web-based system for students to register for courses, view schedules, and track their academic progress with real-time updates.",
+      description: "A comprehensive web-based system...",
       technologies: ["React", "PHP", "MySQL"],
-      image:
-        "https://images.unsplash.com/photo-1555209183-8facf96a4349?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
       githubUrl: "https://github.com",
       featured: true,
     },
     {
       id: 2,
       title: "Staff Evaluation App",
-      description:
-        "A mobile application for evaluating staff performance with real-time feedback, analytics dashboard, and comprehensive reporting features.",
+      description: "A mobile application for evaluating staff...",
       technologies: ["Kotlin", "Firebase", "Android"],
-      image:
-        "https://images.unsplash.com/photo-1658953229625-aad99d7603b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
       githubUrl: "https://github.com",
       featured: true,
     },
     {
       id: 3,
       title: "AI Recommender System",
-      description:
-        "An intelligent recommendation engine using machine learning algorithms to provide personalized suggestions based on user behavior patterns.",
+      description: "An intelligent recommendation engine...",
       technologies: ["Python", "Flask", "TensorFlow"],
-      image:
-        "https://images.unsplash.com/photo-1697577418970-95d99b5a55cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
       githubUrl: "https://github.com",
       featured: true,
     },
   ];
-
-  res.json({
-    success: true,
-    count: projects.length,
-    projects: projects,
-  });
+  res.json({ success: true, count: projects.length, projects });
 });
 
-// Subscribe to newsletter (example endpoint)
+// Newsletter
 app.post("/api/subscribe", (req, res) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: "Email is required",
-    });
-  }
-
+  if (!email)
+    return res
+      .status(400)
+      .json({ success: false, message: "Email is required" });
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide a valid email address",
-    });
-  }
-
+  if (!emailRegex.test(email))
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
   res.json({
     success: true,
     message: "Thank you for subscribing! You will receive updates soon.",
   });
 });
 
-// Health check endpoint
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
@@ -346,26 +357,22 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Serve index.html for the root route
+// Serve index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// 404 handler
+// 404
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Endpoint not found",
-  });
+  res.status(404).json({ success: false, message: "Endpoint not found" });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: "Something went wrong on the server",
-  });
+  res
+    .status(500)
+    .json({ success: false, message: "Something went wrong on the server" });
 });
 
 // Start server
@@ -376,7 +383,7 @@ app.listen(PORT, () => {
 ║     🚀 Portfolio Server Running Successfully!             ║
 ║                                                            ║
 ║     📍 Local:    http://localhost:${PORT}                    ║
-║     📧 Email:    ${process.env.EMAIL_USER || "Not configured"}     ║
+║     📧 Email:    ${EMAIL_USER || "Not configured"}          ║
 ║     📊 Status:   Active                                   ║
 ║                                                            ║
 ║     Available Endpoints:                                  ║
