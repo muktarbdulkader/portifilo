@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "name": "Test",
+    "email": "test@example.com",
+    "message": "Hello from automated test",
+    "timestamp": "2025-10-04T14:32:21.841Z",
+    "status": "unread"
+  },
+  {
+    "id": 2,
+    "name": "MUKTAR group web abdulkader",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "hhhh",
+    "timestamp": "2025-10-04T14:38:09.587Z",
+    "status": "unread"
+  },
+  {
+    "id": 3,
+    "name": "MUKTAR group web abdulkader",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "hhhh",
+    "timestamp": "2025-10-04T14:38:30.341Z",
+    "status": "unread"
+  },
+  {
+    "id": 4,
+    "name": "abdulkahkim hule",
+    "email": "muktarabdulkader35@gmail.com",
+    "message": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "timestamp": "2025-10-04T14:39:42.654Z",
+    "status": "unread"
+  },
+  {
+    "id": 5,
+    "name": "muktar Abdulkader",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "dd",
+    "timestamp": "2025-10-04T14:41:24.680Z",
+    "status": "unread"
+  },
+  {
+    "id": 6,
+    "name": "abdulkahkim hule",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "hhh",
+    "timestamp": "2025-10-04T14:44:02.408Z",
+    "status": "unread"
+  },
+  {
+    "id": 7,
+    "name": "abdulkahkim hule",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "44444444444",
+    "timestamp": "2025-10-04T14:56:43.442Z",
+    "status": "unread"
+  },
+  {
+    "id": 8,
+    "name": "abdulkahkim hule",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "hhhhhhhhhhh",
+    "timestamp": "2025-10-04T14:57:38.171Z",
+    "status": "unread"
+  },
+  {
+    "id": 9,
+    "name": "abdulkahkim hule",
+    "email": "Muktarabdulkader957@gmail.com",
+    "message": "hhhhhhhhhhh",
+    "timestamp": "2025-10-04T15:17:41.288Z",
+    "status": "unread"
+  },
+  {
+    "id": 10,
+    "name": "muktar Abdulkader",
+    "email": "abdulhakimhule8@gmail.com",
+    "message": "hhhh",
+    "timestamp": "2025-10-04T15:20:13.864Z",
+    "status": "unread"
+  }
+]

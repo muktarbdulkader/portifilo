@@ -95,40 +95,100 @@ animatedElements.forEach((el) => {
 
 // Contact Form Handling with Backend Integration
 const contactForm = document.getElementById("contactForm");
-const API_URL = window.location.origin;
+// If the page is opened via file:// (no origin) or origin is 'null', fall back to localhost
+const DEFAULT_API = "http://localhost:3000";
+const API_URL =
+  window.location && window.location.origin && window.location.origin !== "null"
+    ? window.location.origin
+    : DEFAULT_API;
+
+if (!contactForm) {
+  console.warn(
+    "contactForm element not found on this page. Contact handler disabled."
+  );
+}
 
 // Toast notification function
 function showToast(message, type = "success") {
   // Remove existing toast if any
   const existingToast = document.querySelector(".toast");
-  if (existingToast) {
-    existingToast.remove();
-  }
+  if (existingToast) existingToast.remove();
 
   // Create new toast
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
 
-  const icon =
-    type === "success"
-      ? '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
-      : '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  const successIcon = `
+    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>`;
 
-  toast.innerHTML = `
-        ${icon}
-        <span>${message}</span>
-    `;
+  const errorIcon = `
+    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+    </svg>`;
 
+  toast.innerHTML = `${
+    type === "success" ? successIcon : errorIcon
+  }<span>${message}</span>`;
   document.body.appendChild(toast);
 
   // Show toast
   setTimeout(() => toast.classList.add("show"), 100);
 
-  // Hide and remove toast after 5 seconds
+  // spawn confetti for success
+  if (type === "success") spawnConfetti(18);
+
+  // Hide and remove toast after 5.5 seconds
   setTimeout(() => {
     toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 300);
-  }, 5000);
+    setTimeout(() => toast.remove(), 320);
+  }, 5500);
+}
+
+// simple confetti implementation
+function spawnConfetti(count = 12) {
+  const colors = ["#FF6AB6", "#7C3AED", "#06B6D4", "#FFD166", "#60D394"];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("div");
+    el.className = "confetti-piece";
+    el.style.background = colors[i % colors.length];
+    // start near center-bottom (above toast)
+    const startX = window.innerWidth / 2 + (Math.random() * 240 - 120);
+    const startY = window.innerHeight - 80;
+    el.style.left = `${startX}px`;
+    el.style.top = `${startY}px`;
+    document.body.appendChild(el);
+
+    // random velocity and rotation
+    const velocityX = (Math.random() - 0.5) * 600; // px/s
+    const velocityY = -(200 + Math.random() * 600); // upward
+    const rotate = (Math.random() - 0.5) * 720;
+    const duration = 1800 + Math.random() * 900;
+
+    el.animate(
+      [
+        { transform: `translate(0,0) rotate(0deg)`, opacity: 1 },
+        {
+          transform: `translate(${velocityX}px, ${velocityY}px) rotate(${rotate}deg)`,
+          opacity: 1,
+        },
+        {
+          transform: `translate(${velocityX * 1.4}px, ${
+            velocityY * 1.8
+          }px) rotate(${rotate * 1.2}deg)`,
+          opacity: 0,
+        },
+      ],
+      { duration, easing: "cubic-bezier(.2,.8,.2,1)" }
+    );
+
+    setTimeout(() => {
+      el.remove();
+    }, duration + 100);
+  }
 }
 
 // Loading overlay
@@ -154,71 +214,91 @@ function hideLoading() {
   }
 }
 
-contactForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+if (contactForm) {
+  contactForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const message = document.getElementById("message").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const message = document.getElementById("message").value.trim();
 
-  // Client-side validation
-  if (!name || !email || !message) {
-    showToast("Please fill in all fields", "error");
-    return;
-  }
-
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    showToast("Please enter a valid email address", "error");
-    return;
-  }
-
-  // Show loading state
-  showLoading();
-  const submitButton = contactForm.querySelector('button[type="submit"]');
-  submitButton.classList.add("loading");
-
-  try {
-    // Send to backend
-    const response = await fetch(`${API_URL}/api/contact`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, message }),
-    });
-
-    const data = await response.json();
-
-    hideLoading();
-    submitButton.classList.remove("loading");
-
-    if (data.success) {
-      showToast(data.message, "success");
-      contactForm.reset();
-
-      // Add success animation to form
-      contactForm.classList.add("animate__animated", "animate__pulse");
-      setTimeout(() => {
-        contactForm.classList.remove("animate__animated", "animate__pulse");
-      }, 1000);
-    } else {
-      showToast(
-        data.message || "Failed to send message. Please try again.",
-        "error"
-      );
+    // Client-side validation
+    if (!name || !email || !message) {
+      showToast("Please fill in all fields", "error");
+      return;
     }
-  } catch (error) {
-    hideLoading();
-    submitButton.classList.remove("loading");
-    console.error("Error:", error);
-    showToast(
-      "Network error. Please check your connection and try again.",
-      "error"
-    );
-  }
-});
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showToast("Please enter a valid email address", "error");
+      return;
+    }
+
+    // Show loading state
+    showLoading();
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+    submitButton.classList.add("loading");
+
+    try {
+      // Send to backend
+      const response = await fetch(`${API_URL}/api/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      // try to parse JSON, fallback to plain text
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseErr) {
+        const txt = await response.text();
+        data = { success: response.ok, message: txt };
+      }
+
+      hideLoading();
+      submitButton.classList.remove("loading");
+
+      if (!response.ok) {
+        console.error("Server returned non-OK response", response.status, data);
+        showToast(data.message || `Server error (${response.status})`, "error");
+        return;
+      }
+
+      if (data && data.success) {
+        showToast(data.message, "success");
+        contactForm.reset();
+
+        // Add success animation to form
+        contactForm.classList.add("animate__animated", "animate__pulse");
+        setTimeout(() => {
+          contactForm.classList.remove("animate__animated", "animate__pulse");
+        }, 1000);
+      } else {
+        showToast(
+          data.message || "Failed to send message. Please try again.",
+          "error"
+        );
+      }
+    } catch (error) {
+      hideLoading();
+      submitButton.classList.remove("loading");
+      console.error("Contact form submission failed:", error);
+      // Distinguish likely causes
+      if (API_URL === DEFAULT_API) {
+        showToast(
+          "Cannot reach server. Make sure you've started the local server (npm start) and opened the site via http://localhost:3000",
+          "error"
+        );
+      } else {
+        showToast(`Network error: ${error.message}`, "error");
+      }
+    }
+  });
+}
 
 // Load Stats from Backend
 async function loadStats() {
@@ -600,18 +680,20 @@ document.head.appendChild(style);
 
 // Floating "Let's Talk" CTA
 (function () {
-  // Prevent duplicate insertion
+  // Prevent duplicate insertion or if user dismissed previously
   if (document.querySelector(".floating-cta")) return;
+  if (localStorage.getItem("ctaDismissed") === "1") return;
 
-  // Create CTA element
+  // Create CTA element (phone icon only)
   const cta = document.createElement("a");
   cta.href = "#contact";
   cta.className = "floating-cta pulse-glow hide";
-  cta.setAttribute("aria-label", "Let's Talk");
+  cta.setAttribute("aria-label", "Call Muktar");
   cta.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    <span>Let's Talk</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.63A2 2 0 0 1 4.09 2h3a2 2 0 0 1 2 1.72c.12 1.21.38 2.39.76 3.5a2 2 0 0 1-.45 2.11L8.91 11.09a16 16 0 0 0 6 6l1.76-1.8a2 2 0 0 1 2.11-.45c1.11.38 2.29.64 3.5.76A2 2 0 0 1 22 16.92z"/></svg>
   `;
+
+  // no internal dismiss button — keep CTA minimal (phone icon only)
 
   // Instead of scrolling, open a contact modal with phone & telegram
   cta.addEventListener("click", function (e) {
@@ -623,62 +705,51 @@ document.head.appendChild(style);
 
   // Contact modal creation and behavior
   function openContactModal() {
-    if (document.querySelector('.contact-modal-overlay')) return;
+    if (document.querySelector(".contact-modal-overlay")) return;
 
-    const overlay = document.createElement('div');
-    overlay.className = 'contact-modal-overlay';
+    const overlay = document.createElement("div");
+    overlay.className = "contact-modal-overlay";
 
-    const modal = document.createElement('div');
-    modal.className = 'contact-modal';
+    const modal = document.createElement("div");
+    modal.className = "contact-modal";
 
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'close-btn';
-    closeBtn.innerHTML = '✕';
-    closeBtn.addEventListener('click', closeModal);
+    // (modal close button removed — modal can still be closed via overlay or Escape)
 
-    const title = document.createElement('h3');
-    title.textContent = 'Contact Muktar';
+    const title = document.createElement("h3");
+    title.textContent = "Contact Muktar";
 
-    const nameItem = document.createElement('div');
-    nameItem.className = 'contact-item';
+    const nameItem = document.createElement("div");
+    nameItem.className = "contact-item";
     nameItem.innerHTML = `<strong>Name</strong><span>Muktar</span>`;
 
-    const phoneNumber = '+251916662982';
-    const phoneItem = document.createElement('div');
-    phoneItem.className = 'contact-item';
-    phoneItem.innerHTML = `<strong>Phone</strong><span>${phoneNumber}</span>`;
+    const phoneNumber = "+251916662982";
+    const tgLink = "https://t.me/MuktiAbdu";
 
-    const tgLink = 'https://t.me/MuktiAbdu';
-    const tgItem = document.createElement('div');
-    tgItem.className = 'contact-item';
-    tgItem.innerHTML = `<strong>Telegram</strong><span>@MuktiAbdu</span>`;
+    const actions = document.createElement("div");
+    actions.className = "contact-actions";
 
-    const actions = document.createElement('div');
-    actions.className = 'contact-actions';
-
-    const callAnchor = document.createElement('a');
-    callAnchor.className = 'call';
+    const callAnchor = document.createElement("a");
+    callAnchor.className = "call";
     callAnchor.href = `tel:${phoneNumber}`;
-    callAnchor.textContent = 'Call';
+    callAnchor.textContent = "Call";
 
-    const tgAnchor = document.createElement('a');
-    tgAnchor.className = 'tg';
+    const tgAnchor = document.createElement("a");
+    tgAnchor.className = "tg";
     tgAnchor.href = tgLink;
-    tgAnchor.target = '_blank';
-    tgAnchor.rel = 'noopener noreferrer';
-    tgAnchor.textContent = 'Open Telegram';
+    tgAnchor.target = "_blank";
+    tgAnchor.rel = "noopener noreferrer";
+    tgAnchor.textContent = "Open Telegram";
 
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy';
-    copyBtn.textContent = 'Copy Number';
-    copyBtn.addEventListener('click', async () => {
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "copy";
+    copyBtn.textContent = "Copy Number";
+    copyBtn.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(phoneNumber);
         // small toast feedback
-        showToast('Phone number copied to clipboard', 'success');
+        showToast("Phone number copied to clipboard", "success");
       } catch (err) {
-        showToast('Copy failed. Please copy manually.', 'error');
+        showToast("Copy failed. Please copy manually.", "error");
       }
     });
 
@@ -686,33 +757,30 @@ document.head.appendChild(style);
     actions.appendChild(tgAnchor);
     actions.appendChild(copyBtn);
 
-    modal.appendChild(closeBtn);
     modal.appendChild(title);
     modal.appendChild(nameItem);
-    modal.appendChild(phoneItem);
-    modal.appendChild(tgItem);
     modal.appendChild(actions);
 
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
     // show with transition
-    requestAnimationFrame(() => overlay.classList.add('show'));
+    requestAnimationFrame(() => overlay.classList.add("show"));
 
     // close on overlay click (but not when clicking inside modal)
-    overlay.addEventListener('click', (ev) => {
+    overlay.addEventListener("click", (ev) => {
       if (ev.target === overlay) closeModal();
     });
 
     // close on Esc
     function onKey(e) {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === "Escape") closeModal();
     }
-    document.addEventListener('keydown', onKey);
+    document.addEventListener("keydown", onKey);
 
     function closeModal() {
-      overlay.classList.remove('show');
-      document.removeEventListener('keydown', onKey);
+      overlay.classList.remove("show");
+      document.removeEventListener("keydown", onKey);
       setTimeout(() => overlay.remove(), 200);
     }
   }

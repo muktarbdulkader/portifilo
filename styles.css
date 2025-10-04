@@ -15,10 +15,12 @@
     z-index: 9999;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
     background: linear-gradient(90deg, var(--primary), var(--purple));
     color: var(--white);
-    padding: 0.75rem 1rem;
+    padding: 0.5rem;
     border-radius: 9999px;
     box-shadow: 0 12px 30px rgba(79, 70, 229, 0.18);
     text-decoration: none;
@@ -31,6 +33,29 @@
     height: 1rem;
     flex-shrink: 0;
     color: inherit;
+  }
+
+  /* small dismiss button attached to the CTA */
+  .floating-cta-close {
+    position: absolute;
+    right: 0.35rem;
+    top: 0.35rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.08);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    border: none;
+  }
+
+  .floating-cta-close:hover {
+    background: rgba(0, 0, 0, 0.14);
   }
 
   .floating-cta:focus {
@@ -61,7 +86,7 @@
   .contact-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,7 +108,7 @@
     color: var(--foreground-dark, #111);
     border-radius: 12px;
     padding: 1rem 1rem 1.25rem;
-    box-shadow: 0 20px 40px rgba(2,6,23,0.3);
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.3);
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -104,7 +129,7 @@
     padding: 0.5rem 0.5rem;
     border-radius: 8px;
     background: linear-gradient(180deg, #f7f7fb, #ffffff);
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   .contact-actions {
@@ -151,8 +176,12 @@
   }
 
   @media (max-width: 420px) {
-    .contact-modal { width: 90%; }
-    .contact-actions { flex-direction: column; }
+    .contact-modal {
+      width: 90%;
+    }
+    .contact-actions {
+      flex-direction: column;
+    }
   }
   --primary-dark: #4338ca;
   --purple: #07040dff;
@@ -1947,3 +1976,46 @@ button.loading::after {
   border-color: transparent;
   transform: translateY(-2px);
 }
+
+/* ==========================
+   Enhanced toast & confetti
+   ========================== */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 600;
+  z-index: 20000;
+  opacity: 0;
+  pointer-events: auto;
+  transition: transform 320ms cubic-bezier(.2,.9,.2,1), opacity 220ms;
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: linear-gradient(90deg, rgba(124,58,237,0.98), rgba(255,106,182,0.98)); color: white; box-shadow: 0 18px 40px rgba(124,58,237,0.18); }
+.toast.error { background: linear-gradient(90deg, rgba(40,40,50,0.95), rgba(30,30,40,0.95)); color: #ffdede; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+
+.toast .toast-icon { width: 20px; height: 20px; opacity: 0.95; }
+.toast span { font-size: 0.95rem; }
+
+/* confetti pieces */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 14px;
+  background: red;
+  opacity: 0.95;
+  z-index: 19999;
+  pointer-events: none;
+  transform-origin: center;
+}
+

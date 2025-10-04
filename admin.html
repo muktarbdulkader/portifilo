@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin - Messages</title>
+    <style>
+      body {
+        font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial;
+        background: #0b1227;
+        color: #e6eef8;
+        padding: 24px;
+      }
+      .box {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .message {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      .meta {
+        font-size: 0.85rem;
+        color: #9aa7bf;
+      }
+      #token {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        background: #7c3aed;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>Admin: Messages</h1>
+      <p>
+        Enter admin token to load messages (this token is set in your
+        <code>.env</code> as <code>ADMIN_TOKEN</code>).
+      </p>
+      <input id="token" placeholder="paste admin token here" />
+      <button id="load">Load Messages</button>
+      <div id="list"></div>
+    </div>
+
+    <script>
+      document.getElementById("load").addEventListener("click", async () => {
+        const token = document.getElementById("token").value.trim();
+        if (!token) {
+          alert("Enter token");
+          return;
+        }
+        try {
+          const res = await fetch("/api/admin/messages", {
+            headers: { "x-admin-token": token },
+          });
+          if (!res.ok) return alert("Unauthorized or error");
+          const data = await res.json();
+          const list = document.getElementById("list");
+          list.innerHTML = "";
+          data.messages.forEach((m) => {
+            const div = document.createElement("div");
+            div.className = "message";
+            div.innerHTML = `<div class="meta">#${m.id} • ${m.timestamp} • ${m.email}</div><strong>${m.name}</strong><p>${m.message}</p>`;
+            list.appendChild(div);
+          });
+        } catch (e) {
+          alert("Error loading messages");
+        }
+      });
+    </script>
+  </body>
+</html>
