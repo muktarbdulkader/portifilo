@@ -95,12 +95,51 @@ animatedElements.forEach((el) => {
 
 // Contact Form Handling with Backend Integration
 const contactForm = document.getElementById("contactForm");
-// If the page is opened via file:// (no origin) or origin is 'null', fall back to localhost
-const DEFAULT_API = "http://localhost:3000";
-const API_URL =
-  window.location && window.location.origin && window.location.origin !== "null"
-    ? window.location.origin
-    : DEFAULT_API;
+
+// API URL Configuration
+// Check if we're running locally or on a deployed server
+function getApiUrl() {
+  // Check if window.API_URL is set (from index.html script)
+  if (window.API_URL) {
+    return window.API_URL;
+  }
+  
+  // Check if we're running on localhost (development)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:3000';
+  }
+  
+  // For production deployment, try to detect the backend URL
+  // This handles common deployment scenarios
+  const hostname = window.location.hostname;
+  
+  // If deployed on the same domain but different port
+  if (hostname.includes('render.com')) {
+    return 'https://portifilo.onrender.com';
+  }
+  
+  // If deployed on Heroku
+  if (hostname.includes('herokuapp.com')) {
+    return `https://${hostname}`;
+  }
+  
+  // If deployed on Netlify/Vercel (frontend) with separate backend
+  if (hostname.includes('netlify.app') || hostname.includes('vercel.app')) {
+    // You need to set this to your actual backend URL
+    return 'https://your-backend-url.com';
+  }
+  
+  // Default fallback - use same origin
+  return window.location.origin;
+}
+
+const API_URL = getApiUrl();
+
+// Debug logging for deployment troubleshooting
+console.log("🌐 API Configuration:");
+console.log("📍 Current URL:", window.location.href);
+console.log("🔗 API URL:", API_URL);
+console.log("🏠 Hostname:", window.location.hostname);
 
 if (!contactForm) {
   console.warn(
@@ -287,17 +326,50 @@ if (contactForm) {
       hideLoading();
       submitButton.classList.remove("loading");
       console.error("Contact form submission failed:", error);
-      // Distinguish likely causes
-      if (API_URL === DEFAULT_API) {
+      
+      // Provide helpful error messages based on the error type
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
         showToast(
-          "Cannot reach server. Make sure you've started the local server (npm start) and opened the site via http://localhost:3000",
+          "Cannot connect to server. Please make sure the backend server is running (npm start) and try again.",
           "error"
         );
+      } else if (error.name === 'AbortError') {
+        showToast("Request was cancelled. Please try again.", "error");
       } else {
         showToast(`Network error: ${error.message}`, "error");
       }
     }
   });
+}
+
+// Test backend connection
+async function testBackendConnection() {
+  try {
+    console.log("🔍 Testing backend connection...");
+    const response = await fetch(`${API_URL}/api/health`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log("✅ Backend connection successful:", data);
+      return true;
+    } else {
+      console.error("❌ Backend connection failed:", response.status, response.statusText);
+      return false;
+    }
+  } catch (error) {
+    console.error("❌ Backend connection error:", error.message);
+    console.log("💡 Troubleshooting tips:");
+    console.log("   - Check if the backend server is running");
+    console.log("   - Verify the API_URL is correct:", API_URL);
+    console.log("   - Check browser console for CORS errors");
+    console.log("   - Ensure the backend is accessible from your domain");
+    return false;
+  }
 }
 
 // Load Stats from Backend
@@ -360,6 +432,9 @@ statValues.forEach((stat) => {
 
 // Load stats on page load
 loadStats();
+
+// Test backend connection on page load
+testBackendConnection();
 
 // Add hover effect to project cards
 const projectCards = document.querySelectorAll(".project-card");

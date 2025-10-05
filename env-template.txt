@@ -1,0 +1,23 @@
+# Portfolio Backend Environment Variables
+# Copy this file to .env and update with your actual values
+
+# Server Configuration
+PORT=3000
+
+# Email Configuration (Gmail SMTP)
+# Replace with your actual Gmail address
+EMAIL_USER=your-email@gmail.com
+# Use Gmail App Password (not your regular password)
+# Generate at: https://myaccount.google.com/apppasswords
+EMAIL_PASS=your-app-password
+
+# Admin Token for accessing admin panel
+# Generate a secure random string for this
+ADMIN_TOKEN=admin123456789
+
+# Optional: Database URL (if you want to use a database instead of JSON file)
+# DATABASE_URL=mongodb://localhost:27017/portfolio
+
+# Optional: JWT Secret (if implementing authentication)
+# JWT_SECRET=your-jwt-secret-key
+

@@ -892,8 +892,6 @@
               class="contact-form"
               name="contact"
               method="POST"
-              data-netlify="true"
-              netlify-honeypot="bot-field"
             >
               <div class="form-group">
                 <label for="name">Name</label>
@@ -1111,17 +1109,20 @@
     </footer>
 
     <script>
-      // If the frontend is hosted separately (e.g. on Netlify), set the API
-      // base URL so calls go to the Render backend. Change this value only if
-      // you deploy the backend elsewhere.
+      // API URL Configuration
+      // This script sets the API URL for the frontend to communicate with the backend
       (function () {
         try {
-          var renderBackend = "https://portifilo.onrender.com";
-          if (window && window.location && window.location.origin !== renderBackend) {
-            window.API_URL = renderBackend;
+          // For production deployment, set your backend URL here
+          // Example: var productionBackend = "https://your-backend-url.com";
+          var productionBackend = null; // Set this to your production backend URL
+          
+          if (productionBackend && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            window.API_URL = productionBackend;
           }
+          // For local development, the script.js will automatically use localhost:3000
         } catch (e) {
-          /* noop */
+          console.warn("API URL configuration failed:", e);
         }
       })();
     </script>

@@ -13,7 +13,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
 
 // Basic rate limiter for contact submissions to prevent abuse
 const contactLimiter = rateLimit({
@@ -357,9 +356,17 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Serve index.html
+// Serve static files
+app.use(express.static(path.join(__dirname)));
+
+// Serve index.html for the root route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Serve admin.html for admin route
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
 });
 
 // 404
@@ -383,17 +390,25 @@ app.listen(PORT, () => {
 ║     🚀 Portfolio Server Running Successfully!             ║
 ║                                                            ║
 ║     📍 Local:    http://localhost:${PORT}                    ║
+║     📍 Admin:    http://localhost:${PORT}/admin             ║
 ║     📧 Email:    ${EMAIL_USER || "Not configured"}          ║
 ║     📊 Status:   Active                                   ║
 ║                                                            ║
 ║     Available Endpoints:                                  ║
 ║     • GET  /                     - Portfolio website      ║
+║     • GET  /admin                - Admin panel           ║
 ║     • GET  /api/health           - Health check          ║
 ║     • GET  /api/stats            - Portfolio stats       ║
 ║     • GET  /api/projects         - Projects list         ║
 ║     • GET  /api/messages         - All messages          ║
 ║     • POST /api/contact          - Submit contact form   ║
 ║     • POST /api/subscribe        - Newsletter signup     ║
+║                                                            ║
+║     📝 Setup Instructions:                                ║
+║     1. Copy env-template.txt to .env                      ║
+║     2. Update EMAIL_USER and EMAIL_PASS in .env           ║
+║     3. Set ADMIN_TOKEN in .env                            ║
+║     4. Restart server: npm start                          ║
 ║                                                            ║
 ╚════════════════════════════════════════════════════════════╝
     `);
