@@ -1085,15 +1085,14 @@
 
           <div class="footer-links">
             <a
-                  href="https://github.com/muktarbdulkader"
-              href="https://github.com"
+            href="https://github.com/muktarbdulkader"
+           
               target="_blank"
               rel="noopener noreferrer"
               >GitHub</a
             >
             <a
-                              href="https://www.linkedin.com/in/muktar-abdulkader/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BkRgTn12iRwCX9g7yc%2BdGrA%3D%3D"
-
+              href="https://www.linkedin.com/in/muktar-abdulkader/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BkRgTn12iRwCX9g7yc%2BdGrA%3D%3D"
               target="_blank"
               rel="noopener noreferrer"
               >LinkedIn</a
@@ -1110,24 +1109,25 @@
       </div>
     </footer>
 
-    <script>
-      // API URL Configuration
-      // This script sets the API URL for the frontend to communicate with the backend
-      (function () {
-        try {
-          // For production deployment, set your backend URL here
-          // Example: var productionBackend = "https://your-backend-url.com";
-          var productionBackend = null; // Set this to your production backend URL
-          
-          if (productionBackend && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            window.API_URL = productionBackend;
-          }
-          // For local development, the script.js will automatically use localhost:3000
-        } catch (e) {
-          console.warn("API URL configuration failed:", e);
-        }
-      })();
-    </script>
+   <script>
+(function () {
+  try {
+    const productionBackend = "https://portifilo.onrender.com";
+    const localBackend = "http://localhost:3000";
+
+    // Always use production when hosted (not on your computer)
+    const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+    window.API_URL = isLocal ? localBackend : productionBackend;
+
+    console.log("API URL set to:", window.API_URL);
+  } catch (e) {
+    console.warn("API URL configuration failed:", e);
+    window.API_URL = "https://portifilo.onrender.com";
+  }
+})();
+</script>
+
+
     <script src="script.js"></script>
   </body>
 </html>
