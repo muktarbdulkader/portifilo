@@ -164,29 +164,50 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
         const mailOptions = {
           from: EMAIL_USER,
           to: EMAIL_USER,
-          subject: `New Portfolio Contact from ${msg.name}`,
+          subject: `New conntact name${msg.name}`,
           html: `
-            <div style="font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
-                <div style="background: white; padding: 30px; border-radius: 8px;">
-                    <h2 style="color: #4F46E5; margin-bottom: 20px;">New Contact Form Submission</h2>
-                    <div style="margin-bottom: 15px;">
-                        <strong style="color: #666;">Name:</strong>
-                        <p style="margin: 5px 0; color: #333;">${msg.name}</p>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong style="color: #666;">Email:</strong>
-                        <p style="margin: 5px 0; color: #333;">${msg.email}</p>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong style="color: #666;">Message:</strong>
-                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">${
-                          msg.message
-                        }</p>
-                    </div>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p style="color: #999; font-size: 12px;">Received at: ${new Date().toLocaleString()}</p>
-                </div>
-            </div>
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+  <div style="background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+    
+    <!-- Header -->
+    <h2 style="color: #4F46E5; margin-bottom: 20px; text-align: center; font-size: 22px; letter-spacing: 0.5px;">
+      📩 New Contact Form Submission
+    </h2>
+    
+    <!-- Name -->
+    <div style="margin-bottom: 18px;">
+      <strong style="color: #555; font-size: 14px;">👤 Name:</strong>
+      <p style="margin: 6px 0; color: #222; font-size: 15px; font-weight: 500;">${
+        msg.name
+      }</p>
+    </div>
+    
+    <!-- Email -->
+    <div style="margin-bottom: 18px;">
+      <strong style="color: #555; font-size: 14px;">📧 Email:</strong>
+      <p style="margin: 6px 0; color: #222; font-size: 15px; font-weight: 500;">${
+        msg.email
+      }</p>
+    </div>
+    
+    <!-- Message -->
+    <div style="margin-bottom: 18px;">
+      <strong style="color: #555; font-size: 14px;">💬 Message:</strong>
+      <p style="margin: 6px 0; color: #333; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">
+        ${msg.message}
+      </p>
+    </div>
+    
+    <!-- Divider -->
+    <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+    
+    <!-- Footer -->
+    <p style="color: #888; font-size: 12px; text-align: center;">
+      ⏰ Received at: <span style="color:#4F46E5;">${new Date().toLocaleString()}</span>
+    </p>
+  </div>
+</div>
+
           `,
           replyTo: msg.email,
         };
@@ -284,13 +305,11 @@ app.post("/api/admin/send-email", async (req, res) => {
     return res.json({ success: true, message: "Email sent", info });
   } catch (err) {
     console.error("Admin send-email error:", err.message || err);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to send email",
-        error: err.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send email",
+      error: err.message,
+    });
   }
 });
 
@@ -334,12 +353,10 @@ app.post("/api/subscribe", (req, res) => {
       .json({ success: false, message: "Email is required" });
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email))
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid email address",
+    });
   res.json({
     success: true,
     message: "Thank you for subscribing! You will receive updates soon.",
@@ -353,7 +370,49 @@ app.get("/api/health", (req, res) => {
     message: "Server is running",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    emailConfigured: !!EMAIL_USER && !!EMAIL_PASS,
+    adminConfigured: !!process.env.ADMIN_TOKEN,
   });
+});
+
+// Email test endpoint (for debugging)
+app.get("/api/test-email", async (req, res) => {
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    return res.status(500).json({
+      success: false,
+      message:
+        "Email not configured. Check EMAIL_USER and EMAIL_PASS environment variables.",
+    });
+  }
+
+  try {
+    const testMailOptions = {
+      from: EMAIL_USER,
+      to: EMAIL_USER,
+      subject: "Portfolio Email Test",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>✅ Email Test Successful!</h2>
+          <p>Your portfolio email configuration is working correctly.</p>
+          <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>Server:</strong> ${req.get("host")}</p>
+        </div>
+      `,
+    };
+
+    const info = await transporter.sendMail(testMailOptions);
+    res.json({
+      success: true,
+      message: "Test email sent successfully!",
+      info: info.response || info,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to send test email",
+      error: error.message,
+    });
+  }
 });
 
 // Serve static files
@@ -398,6 +457,7 @@ app.listen(PORT, () => {
 ║     • GET  /                     - Portfolio website      ║
 ║     • GET  /admin                - Admin panel           ║
 ║     • GET  /api/health           - Health check          ║
+║     • GET  /api/test-email       - Test email config     ║
 ║     • GET  /api/stats            - Portfolio stats       ║
 ║     • GET  /api/projects         - Projects list         ║
 ║     • GET  /api/messages         - All messages          ║
