@@ -1,9 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
-
+const nodemailer = require("nodemailer");
 const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
@@ -16,20 +14,54 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiter for contact submissions
+// Basic rate limiter for contact submissions to prevent abuse
 const contactLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 6,
+  max: 6, // limit each IP to 6 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// In-memory messages storage
+// Email configuration
+// Sanitize env values (remove quotes and spaces for Gmail App Password)
+const EMAIL_USER = (process.env.EMAIL_USER || "").replace(/^"|"$/g, "").trim();
+const EMAIL_PASS = (process.env.EMAIL_PASS || "")
+  .replace(/^"|"$/g, "")
+  .replace(/\s+/g, "")
+  .trim();
+
+// Prefer explicit SMTP configuration for Gmail (works well with App Passwords)
+// Email configuration (Gmail SMTP for Render)
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587, // Use 587 for TLS
+  secure: false, // false because we are using STARTTLS
+  requireTLS: true, // enforce TLS
+  auth: {
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
+  },
+});
+
+// Verify SMTP on startup
+transporter.verify((err, success) => {
+  if (err) {
+    console.error(
+      "⚠️ SMTP verification failed. Check EMAIL_USER and EMAIL_PASS. App password required.\n",
+      err
+    );
+  } else {
+    console.log("✅ SMTP verified successfully (emails can be sent).");
+  }
+});
+
+// In-memory storage for messages (in production, use a database)
 const DATA_FILE = path.join(__dirname, "messages.json");
+
 let messages = [];
 let messageIdCounter = 1;
 
-// Load messages if file exists
+// Load persisted messages if present
 try {
   if (fs.existsSync(DATA_FILE)) {
     const raw = fs.readFileSync(DATA_FILE, "utf8");
@@ -42,10 +74,21 @@ try {
     }
   }
 } catch (err) {
-  console.warn("Could not load messages:", err.message);
+  console.warn("Could not load persisted messages:", err.message);
 }
 
-// Helper to sanitize text
+// API Routes
+
+// Get all messages (for admin purposes)
+app.get("/api/messages", (req, res) => {
+  res.json({
+    success: true,
+    count: messages.length,
+    messages: messages,
+  });
+});
+
+// helper: sanitize simple text
 function escapeHtml(str) {
   if (!str || typeof str !== "string") return "";
   return str
@@ -60,6 +103,7 @@ function escapeHtml(str) {
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
     let { name, email, message } = req.body;
+
     name = (name || "").trim();
     email = (email || "").trim();
     message = (message || "").trim();
@@ -67,7 +111,7 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
-        message: "Please provide name, email, and message",
+        message: "Please provide all required fields: name, email, and message",
       });
     }
 
@@ -92,52 +136,74 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     };
     messages.push(newMessage);
 
-    // Save messages to file
     const tempFile = DATA_FILE + ".tmp";
     fs.writeFile(tempFile, JSON.stringify(messages, null, 2), (err) => {
-      if (!err) fs.rename(tempFile, DATA_FILE, () => {});
+      if (err) {
+        console.error("Failed to write temp messages file:", err.message);
+      } else {
+        fs.rename(tempFile, DATA_FILE, (renameErr) => {
+          if (renameErr)
+            console.error(
+              "Failed to finalize messages file:",
+              renameErr.message
+            );
+        });
+      }
     });
 
     res.json({
       success: true,
-      message: `Thank you, ${name}! Your message has been received.`,
+      message: `Thank you, ${name}! Your message has been received. I'll get back to you at ${email} soon.`,
       data: newMessage,
       emailQueued: true,
     });
 
-    // Send email via Resend
     (async (msg) => {
       try {
-        const emailHtml = `
-<div style="font-family: Arial, sans-serif; padding:20px; background:#f5f5f5;">
-  <h2>📩 New Contact Form Submission</h2>
-  <p><strong>Name:</strong> ${msg.name}</p>
-  <p><strong>Email:</strong> ${msg.email}</p>
-  <p><strong>Message:</strong><br/>${msg.message}</p>
-  <p>Received at: ${new Date().toLocaleString()}</p>
-</div>`;
+        const mailOptions = {
+          from: `"Portfolio Contact" <${EMAIL_USER}>`,
+          to: EMAIL_USER, // Your inbox
+          subject: `New Contact Form Submission: ${msg.name}`,
+          html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+          <div style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+            <h2 style="color: #4F46E5; text-align:center;">📩 New Contact Form Submission</h2>
+            <p><strong>Name:</strong> ${msg.name}</p>
+            <p><strong>Email:</strong> ${msg.email}</p>
+            <p><strong>Message:</strong><br/>${msg.message}</p>
+            <hr/>
+            <p style="font-size:12px; text-align:center;">Received at: ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `,
+          replyTo: msg.email,
+        };
 
-        const response = await resend.emails.send({
-          from: `Portfolio <${process.env.RESEND_SENDER}>`,
-          to: [process.env.RESEND_RECEIVER],
-          subject: `New Contact Form: ${msg.name}`,
-          html: emailHtml,
-        });
-
-        console.log("Email sent via Resend:", response);
+        const info = await transporter.sendMail(mailOptions);
+        console.log("✅ Email sent:", info.response || info);
 
         // Update message status
         const idx = messages.findIndex((m) => m.id === msg.id);
-        if (idx !== -1) messages[idx].status = "sent";
-      } catch (err) {
-        console.warn("Failed to send email via Resend:", err.message || err);
+        if (idx !== -1) {
+          messages[idx].status = "sent";
+          fs.writeFile(DATA_FILE, JSON.stringify(messages, null, 2), (err) => {
+            if (err)
+              console.error("Failed to update message status:", err.message);
+          });
+        }
+      } catch (bgErr) {
+        console.error(
+          "⚠️ Background email sending failed:",
+          bgErr.message || bgErr
+        );
       }
     })(newMessage);
   } catch (error) {
     console.error("Contact form error:", error);
     res.status(500).json({
       success: false,
-      message: "An error occurred. Please try again.",
+      message:
+        "An error occurred while processing your message. Please try again.",
     });
   }
 });
@@ -166,44 +232,93 @@ app.get("/api/stats", (req, res) => {
   });
 });
 
-// Projects list
+// Admin API
+app.get("/api/admin/messages", (req, res) => {
+  const token = req.headers["x-admin-token"];
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected || token !== expected) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  res.json({ success: true, count: messages.length, messages });
+});
+
+app.post("/api/admin/send-email", async (req, res) => {
+  const token = req.headers["x-admin-token"];
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected || token !== expected) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { to, subject, text, html } = req.body || {};
+  if (!to || !subject || (!text && !html)) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing fields: to, subject and text/html required",
+    });
+  }
+
+  try {
+    const mailOptions = { from: EMAIL_USER, to, subject, text, html };
+    const info = await transporter.sendMail(mailOptions);
+    return res.json({ success: true, message: "Email sent", info });
+  } catch (err) {
+    console.error("Admin send-email error:", err.message || err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send email",
+      error: err.message,
+    });
+  }
+});
+
+// Projects
 app.get("/api/projects", (req, res) => {
   const projects = [
     {
       id: 1,
       title: "Course Registration System",
+      description: "A comprehensive web-based system...",
       technologies: ["React", "PHP", "MySQL"],
+      githubUrl: "https://github.com",
       featured: true,
     },
     {
       id: 2,
       title: "Staff Evaluation App",
-      technologies: ["Kotlin", "Firebase"],
+      description: "A mobile application for evaluating staff...",
+      technologies: ["Kotlin", "Firebase", "Android"],
+      githubUrl: "https://github.com",
       featured: true,
     },
     {
       id: 3,
       title: "AI Recommender System",
+      description: "An intelligent recommendation engine...",
       technologies: ["Python", "Flask", "TensorFlow"],
+      githubUrl: "https://github.com",
       featured: true,
     },
   ];
   res.json({ success: true, count: projects.length, projects });
 });
 
-// Newsletter subscription
+// Newsletter
 app.post("/api/subscribe", (req, res) => {
   const { email } = req.body;
   if (!email)
     return res
       .status(400)
       .json({ success: false, message: "Email is required" });
-
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email))
-    return res.status(400).json({ success: false, message: "Invalid email" });
-
-  res.json({ success: true, message: "Thank you for subscribing!" });
+    return res.status(400).json({
+      success: false,
+      message: "Please provide a valid email address",
+    });
+  res.json({
+    success: true,
+    message: "Thank you for subscribing! You will receive updates soon.",
+  });
 });
 
 // Health check
@@ -213,31 +328,108 @@ app.get("/api/health", (req, res) => {
     message: "Server is running",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    emailConfigured: !!process.env.RESEND_API_KEY,
+    emailConfigured: !!EMAIL_USER && !!EMAIL_PASS,
+    adminConfigured: !!process.env.ADMIN_TOKEN,
   });
 });
 
-// Serve static files & index
+// Email test endpoint (for debugging)
+app.get("/api/test-email", async (req, res) => {
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    return res.status(500).json({
+      success: false,
+      message:
+        "Email not configured. Check EMAIL_USER and EMAIL_PASS environment variables.",
+    });
+  }
+
+  try {
+    const testMailOptions = {
+      from: EMAIL_USER,
+      to: EMAIL_USER,
+      subject: "Portfolio Email Test",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>✅ Email Test Successful!</h2>
+          <p>Your portfolio email configuration is working correctly.</p>
+          <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>Server:</strong> ${req.get("host")}</p>
+        </div>
+      `,
+    };
+
+    const info = await transporter.sendMail(testMailOptions);
+    res.json({
+      success: true,
+      message: "Test email sent successfully!",
+      info: info.response || info,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to send test email",
+      error: error.message,
+    });
+  }
+});
+
+// Serve static files
 app.use(express.static(path.join(__dirname)));
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
-app.get("/admin", (req, res) =>
-  res.sendFile(path.join(__dirname, "admin.html"))
-);
 
-// 404 handler
-app.use((req, res) =>
-  res.status(404).json({ success: false, message: "Endpoint not found" })
-);
+// Serve index.html for the root route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
-// Global error handler
+// Serve admin.html for admin route
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
+
+// 404
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: "Endpoint not found" });
+});
+
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ success: false, message: "Server error" });
+  res
+    .status(500)
+    .json({ success: false, message: "Something went wrong on the server" });
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║     🚀 Portfolio Server Running Successfully!             ║
+║                                                            ║
+║     📍 Local:    http://localhost:${PORT}                    ║
+║     📍 Admin:    http://localhost:${PORT}/admin             ║
+║     📧 Email:    ${EMAIL_USER || "Not configured"}          ║
+║     📊 Status:   Active                                   ║
+║                                                            ║
+║     Available Endpoints:                                  ║
+║     • GET  /                     - Portfolio website      ║
+║     • GET  /admin                - Admin panel           ║
+║     • GET  /api/health           - Health check          ║
+║     • GET  /api/test-email       - Test email config     ║
+║     • GET  /api/stats            - Portfolio stats       ║
+║     • GET  /api/projects         - Projects list         ║
+║     • GET  /api/messages         - All messages          ║
+║     • POST /api/contact          - Submit contact form   ║
+║     • POST /api/subscribe        - Newsletter signup     ║
+║                                                            ║
+║     📝 Setup Instructions:                                ║
+║     1. Copy env-template.txt to .env                      ║
+║     2. Update EMAIL_USER and EMAIL_PASS in .env           ║
+║     3. Set ADMIN_TOKEN in .env                            ║
+║     4. Restart server: npm start                          ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+    `);
 });
 
 module.exports = app;
