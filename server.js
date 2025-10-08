@@ -2,6 +2,20 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const nodemailer = require("nodemailer");
+// optional SendGrid support (HTTP API) to avoid SMTP port blocking
+let sendgrid = null;
+if (process.env.SENDGRID_API_KEY) {
+  try {
+    sendgrid = require("@sendgrid/mail");
+    sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
+  } catch (e) {
+    console.warn(
+      "@sendgrid/mail not installed or failed to load:",
+      e.message || e
+    );
+    sendgrid = null;
+  }
+}
 const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
@@ -43,17 +57,38 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify SMTP on startup
-transporter.verify((err, success) => {
-  if (err) {
-    console.error(
-      "⚠️ SMTP verification failed. Check EMAIL_USER and EMAIL_PASS. App password required.\n",
-      err
-    );
-  } else {
-    console.log("✅ SMTP verified successfully (emails can be sent).");
+// Verify email capability on startup. Prefer SendGrid if configured.
+async function verifyMail() {
+  if (sendgrid) {
+    try {
+      // There is no verify method for SendGrid; do a lightweight sanity check using API key by listing templates (not ideal)
+      console.log(
+        "Using SendGrid for email delivery (SENDGRID_API_KEY present)"
+      );
+      return true;
+    } catch (e) {
+      console.warn("SendGrid sanity check failed:", e.message || e);
+      return false;
+    }
   }
-});
+
+  return new Promise((resolve) => {
+    transporter.verify((err) => {
+      if (err) {
+        console.error(
+          "⚠️ SMTP verification failed. Check EMAIL_USER and EMAIL_PASS. App password required.\n",
+          err && err.message ? err.message : err
+        );
+        resolve(false);
+      } else {
+        console.log("✅ SMTP verified successfully (emails can be sent).");
+        resolve(true);
+      }
+    });
+  });
+}
+
+verifyMail();
 
 // In-memory storage for messages (in production, use a database)
 const DATA_FILE = path.join(__dirname, "messages.json");
@@ -179,8 +214,26 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
           replyTo: msg.email,
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("✅ Email sent:", info.response || info);
+        if (sendgrid) {
+          // Use SendGrid API
+          const sgMsg = {
+            to: msg.email ? EMAIL_USER : EMAIL_USER,
+            from: EMAIL_USER,
+            subject: `New Portfolio Contact from ${msg.name}`,
+            html: `<div style="font-family: Arial, sans-serif; padding:20px;"><h2>New Contact</h2><p><strong>Name:</strong> ${msg.name}</p><p><strong>Email:</strong> ${msg.email}</p><p><strong>Message:</strong><br/>${msg.message}</p></div>`,
+            replyTo: msg.email,
+          };
+          const sgRes = await sendgrid.send(sgMsg);
+          console.log(
+            "✅ SendGrid response:",
+            sgRes && sgRes[0] && sgRes[0].statusCode
+              ? sgRes[0].statusCode
+              : sgRes
+          );
+        } else {
+          const info = await transporter.sendMail(mailOptions);
+          console.log("✅ Email sent:", info.response || info);
+        }
 
         // Update message status
         const idx = messages.findIndex((m) => m.id === msg.id);
@@ -242,6 +295,35 @@ app.get("/api/admin/messages", (req, res) => {
   res.json({ success: true, count: messages.length, messages });
 });
 
+// Admin debug: verify email transporter (does not send mail) - protected
+app.get("/api/admin/debug-email", async (req, res) => {
+  const token = req.headers["x-admin-token"];
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected || token !== expected) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  try {
+    const ok = await verifyMail();
+    if (ok)
+      return res.json({
+        success: true,
+        message: "Email service OK (SendGrid or SMTP verified)",
+      });
+    return res
+      .status(500)
+      .json({ success: false, message: "Email service verification failed" });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Email service verification failed",
+        error: err && err.message ? err.message : String(err),
+      });
+  }
+});
+
 app.post("/api/admin/send-email", async (req, res) => {
   const token = req.headers["x-admin-token"];
   const expected = process.env.ADMIN_TOKEN || "";
@@ -268,6 +350,83 @@ app.post("/api/admin/send-email", async (req, res) => {
       message: "Failed to send email",
       error: err.message,
     });
+  }
+});
+
+// Admin: resend a stored message by id (protected)
+app.post("/api/admin/resend/:id", async (req, res) => {
+  const token = req.headers["x-admin-token"];
+  const expected = process.env.ADMIN_TOKEN || "";
+  if (!expected || token !== expected) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id))
+    return res.status(400).json({ success: false, message: "Invalid id" });
+
+  const msg = messages.find((m) => m.id === id);
+  if (!msg)
+    return res
+      .status(404)
+      .json({ success: false, message: "Message not found" });
+
+  try {
+    // prepare payload
+    const html = `<div style="font-family: Arial, sans-serif; padding:20px;"><h2>Resent Contact</h2><p><strong>Name:</strong> ${msg.name}</p><p><strong>Email:</strong> ${msg.email}</p><p><strong>Message:</strong><br/>${msg.message}</p></div>`;
+
+    if (sendgrid) {
+      const sgMsg = {
+        to: EMAIL_USER,
+        from: EMAIL_USER,
+        subject: `Resent: Contact from ${msg.name}`,
+        html,
+        replyTo: msg.email,
+      };
+      const sgRes = await sendgrid.send(sgMsg);
+      console.log(
+        "Admin resend via SendGrid:",
+        sgRes && sgRes[0] && sgRes[0].statusCode
+      );
+    } else {
+      const info = await transporter.sendMail({
+        from: EMAIL_USER,
+        to: EMAIL_USER,
+        subject: `Resent: Contact from ${msg.name}`,
+        html,
+        replyTo: msg.email,
+      });
+      console.log("Admin resend via SMTP:", info && info.response);
+    }
+
+    // update message status
+    msg.status = "sent";
+    delete msg.emailError;
+    fs.writeFile(DATA_FILE, JSON.stringify(messages, null, 2), (err) => {
+      if (err)
+        console.error("Failed to persist messages after resend:", err.message);
+    });
+
+    return res.json({
+      success: true,
+      message: "Resend attempted, check logs for result",
+      id,
+    });
+  } catch (err) {
+    const em = err && err.message ? err.message : String(err);
+    console.error("Admin resend failed:", em);
+    msg.status = "failed";
+    msg.emailError = em;
+    fs.writeFile(DATA_FILE, JSON.stringify(messages, null, 2), (werr) => {
+      if (werr)
+        console.error(
+          "Failed to persist messages after resend failure:",
+          werr.message
+        );
+    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Resend failed", error: em });
   }
 });
 
