@@ -3,18 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Muktar Abdulkader - Software Engineer & Canva Designer "
-    />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Muktar Abdulkader - Full Stack Software Engineer specializing in Web Development, AI/ML, Cybersecurity, and Graphic Design. Building innovative solutions with React, Node.js, Python, and modern technologies." />
+    <meta name="keywords" content="Muktar Abdulkader, Software Engineer, Full Stack Developer, Web Developer, React Developer, Node.js, Python, AI ML, Cybersecurity, Graphic Designer, Canva Designer, Ethiopia Developer, Haramaya University" />
+    <meta name="author" content="Muktar Abdulkader" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://muktarabdulkader.netlify.app/ >
+    <meta property="og:title" content="Muktar Abdulkader - Full Stack Software Engineer" />
+    <meta property="og:description" content="Full Stack Software Engineer specializing in Web Development, AI/ML, and Cybersecurity. View my portfolio and projects." />
+    <meta property="og:image" content="https://https://muktarabdulkader.netlify.app/image/muktar-portfolio.jpg" />
+    
+
+
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://muktarabdulkader.netlify.app/" />
+    <meta property="twitter:title" content="Muktar Abdulkader - Full Stack Software Engineer" />
+    <meta property="twitter:description" content="Full Stack Software Engineer specializing in Web Development, AI/ML, and Cybersecurity." />
+    <meta property="twitter:image" content="https://muktarabdulkader.netlify.app/image/muktar-portfolio.jpg" />
+    
+    <!-- Favicon -->
     <link rel="icon" href="image/logo m.png" />
-    <title>Muktar Abdulkader - Portfolio</title>
+    <link rel="apple-touch-icon" href="image/logo m.png" />
+    
+    <title>Muktar Abdulkader - Full Stack Software Engineer | Portfolio</title>
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css" />
-    <!-- Animate.css for enhanced animations -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    
+    <!-- Google Analytics (Replace with your tracking ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-508209787"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-508209787'); // Replace with your Google Analytics ID
+    </script>
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Muktar Abdulkader",
+      "url": "https://muktarabdulkader.netlify.app/",
+      "image": "https://muktarabdulkader.netlify.app/image/muktar-photo.jpg",
+      "jobTitle": "Full Stack Software Engineer",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Freelance"
+      },
+      "alumniOf": {
+        "@type": "EducationalOrganization",
+        "name": "Haramaya University"
+      },
+      "knowsAbout": ["Web Development", "Software Engineering", "AI/ML", "Cybersecurity", "Graphic Design"],
+      "sameAs": [
+        "https://github.com/muktarbdulkader",
+        "https://linkedin.com/in/muktar-abdulkader",
+        "https://t.me/MuktiAbdu"
+      ]
+    }
+    </script>
   </head>
   <body>
     <!-- Navigation -->
@@ -33,7 +89,17 @@
         <ul class="nav-menu" id="navMenu">
           <li><a href="#about" class="nav-link">About</a></li>
           <li><a href="#skills" class="nav-link">Skills</a></li>
+          <li><a href="#services" class="nav-link">Services</a></li>
           <li><a href="#projects" class="nav-link">Projects</a></li>
+          <li><a href="#blog" class="nav-link">Blog</a></li>
+          <li>
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle color theme">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+              </svg>
+            </button>
+          </li>
           <li>
             <a href="#contact" class="nav-link">
               <button class="btn-contact">Contact</button>
@@ -45,13 +111,17 @@
 
     <!-- Hero Section -->
     <section id="hero" class="hero">
-      <!-- Animated Background -->
+      
       <div class="hero-bg"></div>
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
       <div class="blob blob-3"></div>
+      
 
-      <!-- Floating Particles -->
+      <div class="blob blob-4" style="background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(139, 92, 246, 0.3)); width: 400px; height: 400px; top: 60%; left: 70%; animation-duration: 25s;"></div>
+      <div class="blob blob-5" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(6, 182, 212, 0.3)); width: 350px; height: 350px; top: 20%; left: 10%; animation-duration: 30s;"></div>
+
+      
       <div class="particles" id="particles"></div>
 
       <div class="hero-content">
@@ -114,6 +184,19 @@
               <path
                 d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"
               />
+            </svg>
+          </a>
+          <a href="#" class="btn btn-outline" id="downloadCV">
+            Download CV
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
           </a>
         </div>
@@ -360,6 +443,70 @@
       </div>
     </section>
 
+    <!-- Education & Certifications Section -->
+    <section id="education" class="education-section">
+      <div class="education-shape"></div>
+
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Education & Certifications</span>
+          <h2 class="section-title gradient-text">Academic Background</h2>
+          <p class="section-description">
+            My educational journey and professional certifications
+          </p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="timeline-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+              </div>
+              <div class="timeline-details">
+                <span class="timeline-date">2021 - Present</span>
+                <h3>Bachelor of Science in Software Engineering</h3>
+                <p class="timeline-institution">Haramaya University, Ethiopia</p>
+                <p class="timeline-description">
+                  Currently in 4th year, specializing in web development, mobile applications,
+                  artificial intelligence, and cybersecurity. Maintaining excellent academic
+                  performance with hands-on project experience.
+                </p>
+                <p class="timeline-note" style="color: var(--cyan); font-style: italic; margin-top: 0.5rem;">
+                  📊 GPA and achievements will be added soon
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="timeline-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="7" />
+                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+                </svg>
+              </div>
+              <div class="timeline-details">
+                <span class="timeline-date">Coming Soon</span>
+                <h3>Professional Certifications</h3>
+                <p class="timeline-institution">Various Platforms</p>
+                <p class="timeline-description">
+                  Currently pursuing professional certifications in web development,
+                  cloud computing, and software engineering. Details will be added as completed.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Skills Section -->
     <section id="skills" class="skills-section">
       <div class="skills-shape"></div>
@@ -374,87 +521,184 @@
           </p>
         </div>
 
-        <div class="skills-grid">
-          <div class="skill-card">
-            <div class="skill-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
+        <div class="skills-icons-grid">
+          <div class="skill-icon-item" title="HTML">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 18L4 14v-4l8 4 8-4v4l-8 4zM4 10l8-4 8 4-8 4-8-4z"/>
+            </svg>
+            <span>HTML</span>
+          </div>
+          
+          <div class="skill-icon-item" title="CSS">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5 3l-.65 3.34h13.59L17.5 8.5H3.92l-.66 3.33h13.59l-.76 3.81-5.48 1.81-4.75-1.81.33-1.64H2.85l-.79 4 7.85 3 9.05-3 1.2-6.03.24-1.21L21.94 3z"/>
+            </svg>
+            <span>CSS</span>
+          </div>
+          
+          <div class="skill-icon-item" title="JavaScript">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 3h18v18H3V3m4.73 15.04c.4.85 1.19 1.55 2.54 1.55 1.5 0 2.53-.8 2.53-2.55v-5.78h-1.7V17c0 .86-.35 1.08-.9 1.08-.58 0-.82-.4-1.09-.87l-1.38.83m5.98-.18c.5.98 1.51 1.73 3.09 1.73 1.6 0 2.8-.83 2.8-2.36 0-1.41-.81-2.04-2.25-2.66l-.42-.18c-.73-.31-1.04-.52-1.04-1.02 0-.41.31-.73.81-.73.48 0 .8.21 1.09.73l1.31-.87c-.55-.96-1.33-1.33-2.4-1.33-1.51 0-2.48.96-2.48 2.23 0 1.38.81 2.03 2.03 2.55l.42.18c.78.34 1.24.55 1.24 1.13 0 .48-.45.83-1.15.83-.83 0-1.31-.43-1.67-1.03l-1.38.8z"/>
+            </svg>
+            <span>JavaScript</span>
+          </div>
+          
+          <div class="skill-icon-item" title="React">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 10.11c1.03 0 1.87.84 1.87 1.89 0 1-.84 1.85-1.87 1.85S10.13 13 10.13 12c0-1.05.84-1.89 1.87-1.89M7.37 20c.63.38 2.01-.2 3.6-1.7-.52-.59-1.03-1.23-1.51-1.9a22.7 22.7 0 0 1-2.4-.36c-.51 2.14-.32 3.61.31 3.96m.71-5.74l-.29-.51c-.11.29-.22.58-.29.86.27.06.57.11.88.16l-.3-.51m6.54-.76l.81-1.5-.81-1.5c-.3-.53-.62-1-.91-1.47C13.17 9 12.6 9 12 9c-.6 0-1.17 0-1.71.03-.29.47-.61.94-.91 1.47L8.57 12l.81 1.5c.3.53.62 1 .91 1.47.54.03 1.11.03 1.71.03.6 0 1.17 0 1.71-.03.29-.47.61-.94.91-1.47M12 6.78c-.19.22-.39.45-.59.72h1.18c-.2-.27-.4-.5-.59-.72m0 10.44c.19-.22.39-.45.59-.72h-1.18c.2.27.4.5.59.72M16.62 4c-.62-.38-2 .2-3.59 1.7.52.59 1.03 1.23 1.51 1.9.82.08 1.63.2 2.4.36.51-2.14.32-3.61-.32-3.96m-.7 5.74l.29.51c.11-.29.22-.58.29-.86-.27-.06-.57-.11-.88-.16l.3.51m1.45-7.05c1.47.84 1.63 3.05 1.01 5.63 2.54.75 4.37 1.99 4.37 3.68s-1.83 2.93-4.37 3.68c.62 2.58.46 4.79-1.01 5.63-1.46.84-3.45-.12-5.37-1.95-1.92 1.83-3.91 2.79-5.38 1.95-1.46-.84-1.62-3.05-1-5.63-2.54-.75-4.37-1.99-4.37-3.68s1.83-2.93 4.37-3.68c-.62-2.58-.46-4.79 1-5.63 1.47-.84 3.46.12 5.38 1.95 1.92-1.83 3.91-2.79 5.37-1.95M17.08 12c.34.75.64 1.5.89 2.26 2.1-.63 3.28-1.53 3.28-2.26s-1.18-1.63-3.28-2.26c-.25.76-.55 1.51-.89 2.26M6.92 12c-.34-.75-.64-1.5-.89-2.26-2.1.63-3.28 1.53-3.28 2.26s1.18 1.63 3.28 2.26c.25-.76.55-1.51.89-2.26m9 2.26l-.3.51c.31-.05.61-.1.88-.16-.07-.28-.18-.57-.29-.86l-.29.51m-2.89 4.04c1.59 1.5 2.97 2.08 3.59 1.7.64-.35.83-1.82.32-3.96-.77.16-1.58.28-2.4.36-.48.67-.99 1.31-1.51 1.9M8.08 9.74l.3-.51c-.31.05-.61.1-.88.16.07.28.18.57.29.86l.29-.51m2.89-4.04C9.38 4.2 8 3.62 7.37 4c-.63.35-.82 1.82-.31 3.96a22.7 22.7 0 0 1 2.4-.36c.48-.67.99-1.31 1.51-1.9z"/>
+            </svg>
+            <span>React</span>
+          </div>
+          
+          <div class="skill-icon-item" title="Node.js">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.27.47 1.71.47 1.4 0 2.21-.85 2.21-2.33V8.44c0-.12-.1-.22-.22-.22H8.5c-.13 0-.23.1-.23.22v8.47c0 .66-.68 1.31-1.77.76L4.45 16.5a.26.26 0 0 1-.11-.21V7.71c0-.09.04-.17.11-.21l7.44-4.29c.06-.04.16-.04.22 0l7.44 4.29c.07.04.11.12.11.21v8.58c0 .08-.04.16-.11.21l-7.44 4.29c-.06.04-.16.04-.23 0L10 19.65c-.08-.03-.16-.04-.21-.01-.53.3-.63.36-1.12.51-.12.04-.31.11.07.32l2.48 1.47c.24.14.5.21.78.21s.54-.07.78-.21l7.44-4.29c.48-.28.78-.8.78-1.36V7.71c0-.56-.3-1.08-.78-1.36l-7.44-4.3c-.23-.13-.5-.2-.78-.2z"/>
+            </svg>
+            <span>Node.js</span>
+          </div>
+          
+          <div class="skill-icon-item" title="Python">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9.585 11.692h4.328s2.432.039 2.432-2.35V5.391S16.714 3 11.936 3C7.362 3 7.647 4.983 7.647 4.983l.006 2.055h4.363v.617H5.92s-2.927-.332-2.927 4.282 2.555 4.45 2.555 4.45h1.524v-2.141s-.083-2.554 2.513-2.554zm-.056-5.74a.784.784 0 1 1 0-1.57.784.784 0 1 1 0 1.57z"/>
+              <path d="M18.452 7.532h-1.524v2.141s.083 2.554-2.513 2.554h-4.328s-2.432-.04-2.432 2.35v3.951s-.369 2.391 4.409 2.391c4.573 0 4.288-1.983 4.288-1.983l-.006-2.054h-4.363v-.617h6.097s2.927.332 2.927-4.282-2.555-4.451-2.555-4.451zm-3.981 10.436a.784.784 0 1 1 0 1.57.784.784 0 1 1 0-1.57z"/>
+            </svg>
+            <span>Python</span>
+          </div>
+          
+          <div class="skill-icon-item" title="PHP">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7.01 10.49c-.53 0-.97.18-1.31.54-.34.36-.51.82-.51 1.38 0 .57.17 1.03.51 1.38.34.36.78.54 1.31.54.53 0 .97-.18 1.31-.54.34-.36.51-.82.51-1.38 0-.57-.17-1.03-.51-1.38-.34-.36-.78-.54-1.31-.54m-.12-1.5c1.03 0 1.85.32 2.46.96.61.64.92 1.49.92 2.55 0 1.07-.31 1.92-.92 2.56-.61.64-1.43.96-2.46.96H5.29l.39-2.18h1.23c.53 0 .97-.18 1.31-.54.34-.36.51-.82.51-1.38 0-.57-.17-1.03-.51-1.38-.34-.36-.78-.54-1.31-.54H5.68l-.39 2.18H3.71l1.18-6.63h3.41m9.39 1.5c-.53 0-.97.18-1.31.54-.34.36-.51.82-.51 1.38 0 .57.17 1.03.51 1.38.34.36.78.54 1.31.54.53 0 .97-.18 1.31-.54.34-.36.51-.82.51-1.38 0-.57-.17-1.03-.51-1.38-.34-.36-.78-.54-1.31-.54m-.12-1.5c1.03 0 1.85.32 2.46.96.61.64.92 1.49.92 2.55 0 1.07-.31 1.92-.92 2.56-.61.64-1.43.96-2.46.96h-1.6l.39-2.18h1.23c.53 0 .97-.18 1.31-.54.34-.36.51-.82.51-1.38 0-.57-.17-1.03-.51-1.38-.34-.36-.78-.54-1.31-.54h-1.23l-.39 2.18h-1.58l1.18-6.63h3.41M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            </svg>
+            <span>PHP</span>
+          </div>
+          
+          <div class="skill-icon-item" title="MySQL">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16.405 5.501c-.115 0-.193.014-.274.033v.013h.014c.054.104.146.18.214.273.054.107.1.214.154.32l.014-.015c.094-.066.14-.172.14-.333-.04-.047-.046-.094-.08-.14-.04-.067-.126-.1-.18-.153zM5.77 18.695h-.927a50.854 50.854 0 00-.27-4.41h-.008l-1.41 4.41H2.45l-1.4-4.41h-.01a72.892 72.892 0 00-.195 4.41H0c.055-1.966.192-3.81.41-5.53h1.15l1.335 4.064h.008l1.347-4.064h1.095c.242 2.015.384 3.86.428 5.53zm4.017-4.08c-.378 2.045-.876 3.533-1.492 4.46-.482.716-1.01 1.073-1.583 1.073-.153 0-.34-.046-.566-.138v-.494c.11.017.24.026.386.026.268 0 .483-.075.647-.222.197-.18.295-.382.295-.605 0-.155-.077-.47-.23-.944L6.23 14.615h.91l.727 2.36c.164.536.233.91.205 1.123.4-1.064.678-2.227.835-3.483zm12.325 4.08h-2.63v-5.53h.885v4.85h1.745zm-3.32.135l-1.016-.5c.09-.076.177-.158.255-.25.433-.506.648-1.258.648-2.253 0-1.83-.718-2.746-2.155-2.746-.704 0-1.254.232-1.65.697-.43.508-.646 1.256-.646 2.245 0 .972.19 1.686.574 2.14.35.41.877.615 1.583.615.264 0 .506-.033.725-.098l1.325.772.36-.622zM15.5 17.588c-.225-.36-.337-.94-.337-1.736 0-1.393.424-2.09 1.27-2.09.443 0 .77.167.977.5.224.362.336.936.336 1.723 0 1.404-.424 2.108-1.27 2.108-.445 0-.77-.167-.978-.5zm-1.658-.425c0 .47-.172.856-.516 1.156-.344.3-.803.45-1.384.45-.543 0-1.064-.172-1.573-.515l.237-.476c.438.22.833.328 1.19.328.332 0 .593-.073.783-.22a.754.754 0 00.3-.615c0-.33-.23-.61-.648-.845-.388-.213-1.163-.657-1.163-.657-.422-.307-.632-.636-.632-1.177 0-.45.157-.81.47-1.085.315-.278.72-.415 1.22-.415.512 0 .98.136 1.4.41l-.213.476a2.726 2.726 0 00-1.064-.23c-.283 0-.502.068-.654.206a.685.685 0 00-.248.524c0 .328.234.61.666.85.393.215 1.187.67 1.187.67.433.305.648.63.648 1.168zm9.382-5.852c-.535-.014-.95.04-1.297.188-.1.04-.26.04-.274.167.055.053.063.14.11.214.08.134.218.313.346.407.14.11.28.216.427.31.26.16.555.255.81.416.145.094.293.213.44.313.073.05.12.14.214.172v-.02c-.046-.06-.06-.147-.105-.214-.067-.067-.134-.127-.2-.193a3.223 3.223 0 00-.695-.675c-.214-.146-.682-.35-.77-.595l-.013-.014c.146-.013.32-.066.46-.106.227-.06.435-.047.67-.106.106-.027.213-.06.32-.094v-.06c-.12-.12-.21-.283-.334-.395a8.867 8.867 0 00-1.104-.823c-.21-.134-.476-.22-.697-.334-.08-.04-.214-.06-.26-.127-.12-.146-.19-.34-.275-.514a17.69 17.69 0 01-.547-1.163c-.12-.262-.193-.523-.34-.763-.69-1.137-1.437-1.826-2.586-2.5-.247-.14-.543-.2-.856-.274-.167-.008-.334-.02-.5-.027-.11-.047-.216-.174-.31-.235-.38-.24-1.364-.76-1.644-.072-.18.434.267.862.422 1.082.115.153.26.328.34.5.047.116.06.235.107.356.106.294.207.622.347.897.073.14.153.287.247.413.054.073.146.107.167.227-.094.136-.1.334-.154.5-.24.757-.146 1.693.194 2.25.107.166.362.534.703.393.3-.12.234-.5.32-.835.02-.08.007-.133.048-.187v.015c.094.188.188.367.274.555.206.328.566.668.867.895.16.12.287.328.487.402v-.02h-.015c-.043-.058-.1-.086-.154-.133a3.445 3.445 0 01-.35-.4 8.76 8.76 0 01-.747-1.218c-.11-.21-.202-.436-.29-.643-.04-.08-.04-.2-.107-.24-.1.146-.247.273-.32.453-.127.288-.14.642-.188 1.01-.027.007-.014 0-.027.014-.214-.052-.287-.274-.367-.46-.2-.475-.233-1.238-.06-1.785.047-.14.247-.582.167-.716-.042-.127-.174-.2-.247-.303a2.478 2.478 0 01-.24-.427c-.16-.374-.24-.788-.414-1.162-.08-.173-.22-.354-.334-.513-.127-.18-.267-.307-.368-.52-.033-.073-.08-.194-.027-.274.014-.054.042-.075.094-.09.088-.072.335.022.422.062.247.1.455.194.662.334.094.066.195.193.315.226h.14c.214.047.455.014.655.073.355.114.675.28.962.46a5.953 5.953 0 012.085 2.286c.08.154.115.295.188.455.14.33.313.663.455.982.14.315.275.636.476.897.1.14.502.213.682.286.133.06.34.115.46.188.23.14.454.3.67.454.11.076.443.243.463.378z"/>
+            </svg>
+            <span>MySQL</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+      <div class="services-shape"></div>
+
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">What I Offer</span>
+          <h2 class="section-title gradient-text">Services</h2>
+          <p class="section-description">
+            Professional services tailored to bring your digital vision to life
+          </p>
+        </div>
+
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
-            <h3>Frontend</h3>
-            <div class="skill-tags">
-              <span class="skill-tag">HTML</span>
-              <span class="skill-tag">CSS</span>
-              <span class="skill-tag">JavaScript</span>
-              <span class="skill-tag">React</span>
-            </div>
+            <h3>Web Development</h3>
+            <p>
+              Custom responsive websites and web applications built with modern
+              technologies like React, Node.js, and PHP. From landing pages to
+              complex web platforms.
+            </p>
+            <ul class="service-features">
+              <li>Responsive Design</li>
+              <li>SEO Optimization</li>
+              <li>Fast Performance</li>
+              <li>Cross-browser Compatible</li>
+            </ul>
           </div>
 
-          <div class="skill-card">
-            <div class="skill-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" />
+              </svg>
+            </div>
+            <h3>AI/ML Solutions</h3>
+            <p>
+              Intelligent systems powered by machine learning and artificial
+              intelligence. From recommendation systems to predictive analytics
+              and automation.
+            </p>
+            <ul class="service-features">
+              <li>Recommendation Systems</li>
+              <li>Data Analysis</li>
+              <li>Automation Tools</li>
+              <li>Predictive Models</li>
+            </ul>
+          </div>
+
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </div>
+            <h3>Graphic Design</h3>
+            <p>
+              Professional Canva designs for social media, marketing materials,
+              presentations, and branding. Eye-catching visuals that communicate
+              your message effectively.
+            </p>
+            <ul class="service-features">
+              <li>Social Media Graphics</li>
+              <li>Brand Identity</li>
+              <li>Marketing Materials</li>
+              <li>Presentation Design</li>
+            </ul>
+          </div>
+
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <h3>Cybersecurity Consulting</h3>
+            <p>
+              Security assessments, vulnerability testing, and implementation of
+              best practices to protect your digital assets and ensure data
+              privacy.
+            </p>
+            <ul class="service-features">
+              <li>Security Audits</li>
+              <li>Penetration Testing</li>
+              <li>Security Training</li>
+              <li>Compliance Consulting</li>
+            </ul>
+          </div>
+
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="16 18 22 12 16 6" />
                 <polyline points="8 6 2 12 8 18" />
               </svg>
             </div>
-            <h3>Backend</h3>
-            <div class="skill-tags">
-              <span class="skill-tag">PHP</span>
-              <span class="skill-tag">Flask</span>
-
-              <span class="skill-tag">Node.js</span>
-            </div>
-          </div>
-
-          <div class="skill-card">
-            <div class="skill-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <ellipse cx="12" cy="5" rx="9" ry="3" />
-                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-              </svg>
-            </div>
-            <h3>Database</h3>
-            <div class="skill-tags">
-              <span class="skill-tag">SQLite</span>
-              <span class="skill-tag">Firebase</span>
-              <span class="skill-tag">MySQL</span>
-            </div>
-          </div>
-
-          <div class="skill-card">
-            <div class="skill-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-            <h3>Other Skills</h3>
-            <div class="skill-tags">
-              <span class="skill-tag">Cybersecurity</span>
-              <span class="skill-tag">canvas dsigner</span>
-              <span class="skill-tag">AI/ML</span>
-            </div>
+            <h3>API Development & Integration</h3>
+            <p>
+              RESTful API development and third-party API integration. Connect
+              your applications with external services and build scalable backend
+              systems.
+            </p>
+            <ul class="service-features">
+              <li>RESTful APIs</li>
+              <li>Third-party Integration</li>
+              <li>Database Design</li>
+              <li>Documentation</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -726,6 +970,129 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog" class="blog-section">
+      <div class="blog-shape"></div>
+
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Blog & Articles</span>
+          <h2 class="section-title gradient-text">Latest Insights</h2>
+          <p class="section-description">
+            Thoughts, tutorials, and insights on software development, AI, and technology
+          </p>
+        </div>
+
+        <div class="blog-grid">
+          <article class="blog-card">
+            <div class="blog-image">
+              <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800" alt="Web Development" />
+              <span class="blog-category">Web Development</span>
+            </div>
+            <div class="blog-content">
+              <div class="blog-meta">
+                <span class="blog-date">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Oct 5, 2025
+                </span>
+                <span class="blog-read-time">5 min read</span>
+              </div>
+              <h3 class="blog-title">Building Scalable Web Applications with Node.js</h3>
+              <p class="blog-excerpt">
+                Learn best practices for creating efficient and scalable web applications
+                using Node.js, Express, and modern JavaScript frameworks.
+              </p>
+              <p class="blog-full-content" style="display: none;">
+                This comprehensive guide covers microservices architecture, load balancing,
+                caching strategies, database optimization, and deployment best practices.
+                You'll learn how to build applications that can handle millions of users
+                while maintaining high performance and reliability.
+              </p>
+              <button class="blog-toggle">
+                <span class="toggle-text">Read More</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14m-7-7l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <article class="blog-card">
+            <div class="blog-image">
+              <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800" alt="AI Machine Learning" />
+              <span class="blog-category">AI & ML</span>
+            </div>
+            <div class="blog-content">
+              <div class="blog-meta">
+                <span class="blog-date">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Sep 28, 2025
+                </span>
+                <span class="blog-read-time">8 min read</span>
+              </div>
+              <h3 class="blog-title">Introduction to Recommendation Systems with Python</h3>
+              <p class="blog-excerpt">
+                A comprehensive guide to building recommendation systems using collaborative
+                filtering and machine learning algorithms in Python.
+              </p>
+              <p class="blog-full-content" style="display: none;">
+                Dive deep into content-based filtering, collaborative filtering, and hybrid approaches.
+                Learn to implement recommendation engines using scikit-learn, TensorFlow, and pandas.
+                Includes real-world examples from e-commerce and streaming platforms.
+              </p>
+              <button class="blog-toggle">
+                <span class="toggle-text">Read More</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14m-7-7l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <article class="blog-card">
+            <div class="blog-image">
+              <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800" alt="Cybersecurity" />
+              <span class="blog-category">Cybersecurity</span>
+            </div>
+            <div class="blog-content">
+              <div class="blog-meta">
+                <span class="blog-date">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  Sep 15, 2025
+                </span>
+                <span class="blog-read-time">6 min read</span>
+              </div>
+              <h3 class="blog-title">Essential Web Security Practices for Developers</h3>
+              <p class="blog-excerpt">
+                Protect your web applications from common vulnerabilities with these
+                essential security practices and tools every developer should know.
+              </p>
+              <p class="blog-full-content" style="display: none;">
+                Learn about SQL injection prevention, XSS protection, CSRF tokens, secure authentication,
+                encryption, and security headers. Includes practical examples and tools like OWASP ZAP,
+                Burp Suite, and security testing frameworks.
+              </p>
+              <button class="blog-toggle">
+                <span class="toggle-text">Read More</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14m-7-7l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -1069,6 +1436,25 @@
         </div>
       </div>
     </section>
+
+    <!-- Blog Modal -->
+    <div id="blogModal" class="blog-modal">
+      <div class="blog-modal-content">
+        <button class="blog-modal-close" id="closeBlogModal">✕</button>
+        <div class="blog-modal-header">
+          <span class="blog-modal-category" id="modalCategory">Category</span>
+          <h1 class="blog-modal-title" id="modalTitle">Blog Title</h1>
+          <div class="blog-modal-meta">
+            <span id="modalDate">Date</span>
+            <span id="modalReadTime">Read Time</span>
+          </div>
+        </div>
+        <img class="blog-modal-image" id="modalImage" src="" alt="">
+        <div class="blog-modal-body" id="modalBody">
+          <!-- Content will be inserted here -->
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">

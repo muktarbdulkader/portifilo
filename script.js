@@ -41,31 +41,8 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   });
 });
 
-// Create Floating Particles
+// Particle container reference (particles created at the end of script)
 const particlesContainer = document.getElementById("particles");
-const particleCount = 50;
-
-function createParticle() {
-  const particle = document.createElement("div");
-  particle.classList.add("particle");
-
-  particle.style.left = `${Math.random() * 100}%`;
-  particle.style.top = `${Math.random() * 100}%`;
-
-  const size = Math.random() * 6 + 4;
-  particle.style.width = `${size}px`;
-  particle.style.height = `${size}px`;
-
-  particle.style.animationDelay = `${Math.random() * 3}s`;
-  particle.style.animationDuration = `${4 + Math.random() * 6}s`;
-
-  particlesContainer.appendChild(particle);
-}
-
-// Generate all particles
-for (let i = 0; i < particleCount; i++) {
-  createParticle();
-}
 
 // Scroll Reveal Animation
 const observerOptions = {
@@ -103,32 +80,35 @@ function getApiUrl() {
   if (window.API_URL) {
     return window.API_URL;
   }
-  
+
   // Check if we're running on localhost (development)
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:3000';
+  if (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  ) {
+    return "http://localhost:3000";
   }
-  
+
   // For production deployment, try to detect the backend URL
   // This handles common deployment scenarios
   const hostname = window.location.hostname;
-  
+
   // If deployed on the same domain but different port
-  if (hostname.includes('render.com')) {
-    return 'https://portifilo.onrender.com';
+  if (hostname.includes("render.com")) {
+    return "https://portifilo.onrender.com";
   }
-  
+
   // If deployed on Heroku
-  if (hostname.includes('herokuapp.com')) {
+  if (hostname.includes("herokuapp.com")) {
     return `https://${hostname}`;
   }
-  
+
   // If deployed on Netlify/Vercel (frontend) with separate backend
-  if (hostname.includes('netlify.app') || hostname.includes('vercel.app')) {
+  if (hostname.includes("netlify.app") || hostname.includes("vercel.app")) {
     // You need to set this to your actual backend URL
-    return 'https://your-backend-url.com';
+    return "https://your-backend-url.com";
   }
-  
+
   // Default fallback - use same origin
   return window.location.origin;
 }
@@ -326,14 +306,14 @@ if (contactForm) {
       hideLoading();
       submitButton.classList.remove("loading");
       console.error("Contact form submission failed:", error);
-      
+
       // Provide helpful error messages based on the error type
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
         showToast(
           "Cannot connect to server. Please make sure the backend server is running (npm start) and try again.",
           "error"
         );
-      } else if (error.name === 'AbortError') {
+      } else if (error.name === "AbortError") {
         showToast("Request was cancelled. Please try again.", "error");
       } else {
         showToast(`Network error: ${error.message}`, "error");
@@ -347,18 +327,22 @@ async function testBackendConnection() {
   try {
     console.log("🔍 Testing backend connection...");
     const response = await fetch(`${API_URL}/api/health`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       console.log("✅ Backend connection successful:", data);
       return true;
     } else {
-      console.error("❌ Backend connection failed:", response.status, response.statusText);
+      console.error(
+        "❌ Backend connection failed:",
+        response.status,
+        response.statusText
+      );
       return false;
     }
   } catch (error) {
@@ -888,3 +872,256 @@ document.head.appendChild(style);
     }
   });
 })();
+
+// Download CV Button Functionality
+const downloadCVBtn = document.getElementById("downloadCV");
+if (downloadCVBtn) {
+  downloadCVBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    // Show a message to the user
+    const toast = document.createElement("div");
+    toast.className = "toast success show";
+    toast.innerHTML = `
+      <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>CV download will be available soon! Please contact me directly.</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+
+    // Optional: You can replace this with actual CV download link
+    window.open("image/MUKTAR-ABDULKADER.pdf", "_blank");
+  });
+}
+
+const newSectionElements = document.querySelectorAll(
+  ".service-card, .timeline-item, .blog-card"
+);
+
+newSectionElements.forEach((el) => {
+  observer.observe(el);
+});
+
+// ==========================
+// Theme Toggle Functionality
+// ==========================
+
+const themeToggle = document.getElementById("themeToggle");
+const themes = ["blue", "black"];
+let currentThemeIndex = 0;
+document.body.classList.remove(themes[currentThemeIndex]);
+currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+document.body.classList.add(themes[currentThemeIndex]);
+localStorage.setItem("portfolioTheme", themes[currentThemeIndex]);
+
+if (themeToggle) {
+  // Load saved theme
+  const savedTheme = localStorage.getItem("portfolioTheme");
+  if (savedTheme && themes.includes(savedTheme)) {
+    document.body.classList.add(savedTheme);
+    currentThemeIndex = themes.indexOf(savedTheme);
+  }
+
+  themeToggle.addEventListener("click", () => {
+    if (themes[currentThemeIndex]) {
+      document.body.classList.remove(themes[currentThemeIndex]);
+    }
+
+    currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+
+    document.body.classList.add(themes[currentThemeIndex]);
+
+    localStorage.setItem("portfolioTheme", themes[currentThemeIndex]);
+
+    themeToggle.style.transform = "rotate(360deg) scale(1.2)";
+    setTimeout(() => {
+      themeToggle.style.transform = "";
+    }, 300);
+
+    showThemeToast(themes[currentThemeIndex]);
+  });
+}
+
+function showThemeToast(theme) {
+  const themeNames = {
+    blue: "Ocean Blue Theme",
+    black: "Dark Theme",
+  };
+
+  const toast = document.createElement("div");
+  toast.className = "toast success show";
+  toast.innerHTML = `
+    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+    </svg>
+    <span>${themeNames[theme] || "Theme"} activated! 🎨</span>
+  `;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
+// ==========================
+// Blog Modal System
+// ==========================
+const blogModal = document.getElementById("blogModal");
+const closeBlogModal = document.getElementById("closeBlogModal");
+const blogToggles = document.querySelectorAll(".blog-toggle");
+
+// Blog data
+const blogData = {
+  0: {
+    category: "Web Development",
+    title: "Building Scalable Web Applications with Node.js",
+    date: "Oct 5, 2025",
+    readTime: "5 min read",
+    image:
+      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800",
+    content: `
+      <h3>Introduction</h3>
+      <p>Building scalable web applications is crucial in today's digital landscape. Node.js has emerged as a powerful platform for creating high-performance, scalable applications that can handle millions of concurrent users.</p>
+      
+      <h3>Microservices Architecture</h3>
+      <p>One of the key principles in building scalable applications is adopting a microservices architecture. This approach breaks down your application into smaller, independent services that can be developed, deployed, and scaled independently.</p>
+      
+      <h3>Load Balancing Strategies</h3>
+      <p>Implementing effective load balancing is essential for distributing traffic across multiple servers. We'll explore various load balancing techniques including round-robin, least connections, and IP hash methods.</p>
+      
+      <h3>Caching and Performance</h3>
+      <p>Caching is a critical component of scalable applications. Learn how to implement Redis caching, CDN integration, and database query optimization to dramatically improve your application's performance.</p>
+      
+      <h3>Deployment Best Practices</h3>
+      <p>Finally, we'll cover modern deployment strategies including containerization with Docker, orchestration with Kubernetes, and CI/CD pipelines for automated deployments.</p>
+    `,
+  },
+  1: {
+    category: "AI & ML",
+    title: "Introduction to Recommendation Systems with Python",
+    date: "Sep 28, 2025",
+    readTime: "8 min read",
+    image:
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800",
+    content: `
+      <h3>What are Recommendation Systems?</h3>
+      <p>Recommendation systems are algorithms designed to suggest relevant items to users. They power features like "You might also like" on e-commerce sites and "Recommended for you" on streaming platforms.</p>
+      
+      <h3>Content-Based Filtering</h3>
+      <p>This approach recommends items similar to what a user has liked in the past. We'll implement this using TF-IDF vectorization and cosine similarity in Python.</p>
+      
+      <h3>Collaborative Filtering</h3>
+      <p>Learn how to build recommendation engines based on user behavior patterns. We'll explore both user-based and item-based collaborative filtering techniques using scikit-learn.</p>
+      
+      <h3>Hybrid Approaches</h3>
+      <p>Discover how to combine multiple recommendation strategies to create more accurate and robust systems. We'll implement a hybrid model using TensorFlow.</p>
+      
+      <h3>Real-World Applications</h3>
+      <p>See practical examples from Netflix, Amazon, and Spotify, and learn how to apply these techniques to your own projects.</p>
+    `,
+  },
+  2: {
+    category: "Cybersecurity",
+    title: "Essential Web Security Practices for Developers",
+    date: "Sep 15, 2025",
+    readTime: "6 min read",
+    image:
+      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800",
+    content: `
+      <h3>Understanding Web Vulnerabilities</h3>
+      <p>Web applications face numerous security threats. Understanding common vulnerabilities is the first step in building secure applications.</p>
+      
+      <h3>SQL Injection Prevention</h3>
+      <p>Learn how to protect your database from SQL injection attacks using parameterized queries, prepared statements, and ORM frameworks.</p>
+      
+      <h3>Cross-Site Scripting (XSS) Protection</h3>
+      <p>Implement proper input validation, output encoding, and Content Security Policy (CSP) headers to prevent XSS attacks.</p>
+      
+      <h3>Authentication & Authorization</h3>
+      <p>Explore best practices for implementing secure authentication systems, including password hashing with bcrypt, JWT tokens, and OAuth 2.0.</p>
+      
+      <h3>Security Testing Tools</h3>
+      <p>Get hands-on with industry-standard security testing tools like OWASP ZAP, Burp Suite, and automated security scanners to identify vulnerabilities in your applications.</p>
+    `,
+  },
+};
+
+blogToggles.forEach((toggle, index) => {
+  toggle.addEventListener("click", function () {
+    // Open modal with blog data
+    const data = blogData[index];
+    if (data) {
+      document.getElementById("modalCategory").textContent = data.category;
+      document.getElementById("modalTitle").textContent = data.title;
+      document.getElementById("modalDate").textContent = data.date;
+      document.getElementById("modalReadTime").textContent = data.readTime;
+      document.getElementById("modalImage").src = data.image;
+      document.getElementById("modalBody").innerHTML = data.content;
+
+      blogModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+  });
+});
+
+// Close modal
+closeBlogModal.addEventListener("click", () => {
+  blogModal.classList.remove("active");
+  document.body.style.overflow = "auto";
+});
+
+// Close on background click
+blogModal.addEventListener("click", (e) => {
+  if (e.target === blogModal) {
+    blogModal.classList.remove("active");
+    document.body.style.overflow = "auto";
+  }
+});
+
+// Close on Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && blogModal.classList.contains("active")) {
+    blogModal.classList.remove("active");
+    document.body.style.overflow = "auto";
+  }
+});
+
+// ==========================
+// Enhanced Particle System - Tiny & Slow
+// ==========================
+function createEnhancedParticle() {
+  const particle = document.createElement("div");
+  particle.classList.add("particle");
+
+  // Random position
+  particle.style.left = `${Math.random() * 100}%`;
+  particle.style.top = `${Math.random() * 100}%`;
+
+  // Tiny particles (2-5px)
+  const size = Math.random() * 3 + 2;
+  particle.style.width = `${size}px`;
+  particle.style.height = `${size}px`;
+
+  // Random animation delay
+  particle.style.animationDelay = `${Math.random() * -30}s`;
+
+  // Slow animation duration (25-40s)
+  particle.style.animationDuration = `${25 + Math.random() * 15}s`;
+
+  particlesContainer.appendChild(particle);
+}
+
+// Clear existing particles and create enhanced ones
+if (particlesContainer) {
+  particlesContainer.innerHTML = "";
+  for (let i = 0; i < 60; i++) {
+    createEnhancedParticle();
+  }
+}
