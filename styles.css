@@ -5,6 +5,13 @@
   box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
 :root {
   --primary: #00f5ff;
   --primary-dark: #00d4e6;
@@ -210,6 +217,14 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  background: #0a0a0f;
+  background-color: #0a0a0f;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  height: 100%;
 }
 
 body {
@@ -221,10 +236,18 @@ body {
   background: linear-gradient(-45deg, #0a0a0f, #1a1a2e, #16213e, #0f1419);
   background-size: 200% 200%;
   background-attachment: fixed;
-
+  background-color: #0a0a0f;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
   position: relative;
   will-change: auto;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
@@ -239,6 +262,9 @@ body {
 section {
   position: relative;
   z-index: 1;
+  background-color: transparent;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 nav {
