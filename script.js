@@ -1205,3 +1205,39 @@ if (particlesContainer) {
     createEnhancedParticle();
   }
 }
+
+// ==========================
+// Social Sharing Functions
+// ==========================
+
+function shareOnTwitter() {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent("Check out this amazing portfolio by Muktar Abdulkader - Full Stack Software Engineer! 🚀");
+  const hashtags = encodeURIComponent("WebDevelopment,SoftwareEngineer,Portfolio");
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}&hashtags=${hashtags}`, '_blank');
+}
+
+function shareOnLinkedIn() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+}
+
+function shareOnFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+}
+
+function shareOnTelegram() {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent("Check out this amazing portfolio! 🚀");
+  window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+}
+
+function copyLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Link copied to clipboard! 📋', 'success');
+  }).catch(() => {
+    showToast('Failed to copy link', 'error');
+  });
+}

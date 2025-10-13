@@ -1,0 +1,11 @@
+# robots.txt for Muktar Abdulkader Portfolio
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin.html
+Disallow: /messages.json
+Disallow: /.env
+
+# Sitemap
+Sitemap: https://muktarabdulkader.netlify.app/sitemap.xml

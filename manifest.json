@@ -1,0 +1,27 @@
+{
+  "name": "Muktar Abdulkader - Portfolio",
+  "short_name": "Muktar Portfolio",
+  "description": "Full Stack Software Engineer specializing in Web Development, AI/ML, and Cybersecurity",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00f5ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "image/logo m.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "image/logo m.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "developer", "technology"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
