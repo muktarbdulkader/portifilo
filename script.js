@@ -1150,6 +1150,67 @@ blogToggles.forEach((toggle, index) => {
     }
   });
 });
+//fileter
+document.addEventListener("DOMContentLoaded", () => {
+  const filterButtons = document.querySelectorAll(".bt-n");
+  const projects = document.querySelectorAll(".project-card");
+
+  projects.forEach((project) => {
+    if (project.classList.contains("frontend")) {
+      project.style.display = "block";
+    } else {
+      project.style.display = "none";
+    }
+  });
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filterValue = button.getAttribute("data-filter");
+
+      projects.forEach((project) => {
+        if (filterValue === "all" || project.classList.contains(filterValue)) {
+          project.style.display = "block";
+        } else {
+          project.style.display = "none";
+        }
+      });
+
+      // Optional: Active button highlight
+      // filterButtons.forEach((btn) => btn.classList.remove("active"));
+      // button.classList.add("active");
+    });
+  });
+});
+document.querySelectorAll(".image").forEach((button) => {
+  button.addEventListener("click", () => {
+    const projectCard = button.closest(".project-card");
+    const firstImage = projectCard.querySelector(".project-image img"); // get first img
+    const modalImage2 = document.getElementById("modalImage2");
+    const blogModal2 = document.getElementById("blogModal2");
+
+    modalImage2.src = firstImage.src;
+    blogModal2.classList.add("active");
+    document.body.style.overflow = "hidden";
+  });
+});
+
+// Close modal when clicking the close button or outside the image
+const blogModal2 = document.getElementById("blogModal2");
+const closeBtn2 = document.querySelector(".close");
+
+closeBtn2.addEventListener("click", () => {
+  blogModal2.classList.remove("active");
+  document.body.style.overflow = "auto";
+});
+
+blogModal2.addEventListener("click", (e) => {
+  if (e.target === blogModal2) {
+    blogModal2.classList.remove("active");
+    document.body.style.overflow = "auto";
+  }
+});
+
+// Close modal when clicking the close button or outside the image
 
 // Close modal
 closeBlogModal.addEventListener("click", () => {
@@ -1212,32 +1273,45 @@ if (particlesContainer) {
 
 function shareOnTwitter() {
   const url = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent("Check out this amazing portfolio by Muktar Abdulkader - Full Stack Software Engineer! 🚀");
-  const hashtags = encodeURIComponent("WebDevelopment,SoftwareEngineer,Portfolio");
-  window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}&hashtags=${hashtags}`, '_blank');
+  const text = encodeURIComponent(
+    "Check out this amazing portfolio by Muktar Abdulkader - Full Stack Software Engineer! 🚀"
+  );
+  const hashtags = encodeURIComponent(
+    "WebDevelopment,SoftwareEngineer,Portfolio"
+  );
+  window.open(
+    `https://twitter.com/intent/tweet?url=${url}&text=${text}&hashtags=${hashtags}`,
+    "_blank"
+  );
 }
 
 function shareOnLinkedIn() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+  window.open(
+    `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+    "_blank"
+  );
 }
 
 function shareOnFacebook() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
 }
 
 function shareOnTelegram() {
   const url = encodeURIComponent(window.location.href);
   const text = encodeURIComponent("Check out this amazing portfolio! 🚀");
-  window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+  window.open(`https://t.me/share/url?url=${url}&text=${text}`, "_blank");
 }
 
 function copyLink() {
   const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => {
-    showToast('Link copied to clipboard! 📋', 'success');
-  }).catch(() => {
-    showToast('Failed to copy link', 'error');
-  });
+  navigator.clipboard
+    .writeText(url)
+    .then(() => {
+      showToast("Link copied to clipboard! 📋", "success");
+    })
+    .catch(() => {
+      showToast("Failed to copy link", "error");
+    });
 }
