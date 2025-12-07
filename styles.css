@@ -3775,3 +3775,238 @@ body.theme-pink::before {
     justify-content: center;
   }
 }
+/* Add to your existing CSS file */
+
+/* Backend Warning */
+.backend-warning {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  animation: pulse 2s infinite;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.backend-warning p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.backend-warning small {
+  opacity: 0.9;
+  font-size: 0.85rem;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* Form Validation States */
+.contact-form input.valid,
+.contact-form textarea.valid {
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.contact-form input.invalid,
+.contact-form textarea.invalid {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Modal Close Button */
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6B7280;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+  transform: rotate(90deg);
+}
+
+/* Contact Modal Close Button */
+.contact-modal .modal-close {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.contact-modal .modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Shimmer Effect for Cards */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Floating CTA Animation */
+.floating-cta.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(79, 70, 229, 0.8), 0 0 60px rgba(79, 70, 229, 0.4);
+  }
+}
+
+/* Loading Spinner Enhancement */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(79, 70, 229, 0.1);
+  border-radius: 50%;
+  border-top-color: #4F46E5;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Particle Optimization */
+.particle {
+  position: absolute;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.6), rgba(124, 58, 237, 0.3));
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: float linear infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-40px) translateX(0);
+  }
+  75% {
+    transform: translateY(-20px) translateX(-10px);
+  }
+}
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+  .backend-warning {
+    margin: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .modal-close {
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.5rem;
+  }
+  
+  .floating-cta {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .floating-cta,
+  .modal,
+  .modal-overlay,
+  .loading-overlay,
+  .toast {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .btn, .card, .modal {
+    border: 2px solid currentColor;
+  }
+  
+  .shimmer::before {
+    display: none;
+  }
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .shimmer::before,
+  .floating-cta.pulse-glow,
+  .particle {
+    display: none !important;
+  }
+}

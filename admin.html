@@ -1,124 +1,1007 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Admin - Messages</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Admin Dashboard | Portfolio Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial;
-        background: #0b1227;
-        color: #e6eef8;
-        padding: 24px;
-      }
-      .box {
-        max-width: 900px;
-        margin: 0 auto;
-      }
-      .message {
-        background: rgba(255, 255, 255, 0.03);
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-      }
-      .meta {
-        font-size: 0.85rem;
-        color: #9aa7bf;
-      }
-      #token {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 8px;
-      }
-      button {
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: none;
-        background: #7c3aed;
-        color: white;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="box">
-      <h1>Admin: Messages</h1>
-      <p>
-        Enter admin token to load messages (this token is set in your
-        <code>.env</code> as <code>ADMIN_TOKEN</code>).
-      </p>
-      <input id="token" placeholder="paste admin token here" />
-      <button id="load">Load Messages</button>
-      <div style="margin-top: 18px">
-        <h2>Send Email</h2>
-        <p style="color: #9aa7bf">
-          Use this form to send emails using the configured SMTP credentials.
-        </p>
-        <div style="display: grid; gap: 8px; max-width: 680px">
-          <input id="emailTo" placeholder="to@example.com" />
-          <input id="emailSub" placeholder="Subject" />
-          <textarea
-            id="emailBody"
-            placeholder="Message text"
-            style="min-height: 120px"
-          ></textarea>
-          <button id="sendEmail">Send Email</button>
-        </div>
-      </div>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #f8fafc;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-      <div id="list"></div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Login Page */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            transform: translateY(0);
+            transition: var(--transition);
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .login-header h2 {
+            color: var(--dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #4338ca);
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: var(--light);
+        }
+
+        /* Sidebar - Desktop */
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--border);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .sidebar-header h3 {
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .nav-menu {
+            padding: 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.total { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .stat-icon.unread { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .stat-icon.replied { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .stat-icon.archived { background: rgba(148, 163, 184, 0.1); color: #64748b; }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            color: #64748b;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-action:hover {
+            background: var(--light);
+        }
+
+        .btn-action.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-action.primary:hover {
+            background: var(--primary-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            background: var(--light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .badge-new { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .badge-read { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+        .badge-replied { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-archived { background: rgba(148, 163, 184, 0.1); color: #64748b; }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: var(--light);
+        }
+
+        .btn-icon.view:hover { color: var(--info); }
+        .btn-icon.reply:hover { color: var(--success); }
+        .btn-icon.archive:hover { color: #64748b; }
+        .btn-icon.delete:hover { color: var(--danger); }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 1rem;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 400px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            background: var(--success);
+            color: white;
+        }
+
+        .notification.error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .notification.warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .notification.info {
+            background: var(--info);
+            color: white;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            /* Mobile Header */
+            .mobile-header {
+                display: flex;
+                background: white;
+                padding: 1rem;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 999;
+                box-shadow: var(--shadow);
+                align-items: center;
+                justify-content: space-between;
+            }
+            
+            .menu-toggle {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: var(--dark);
+                cursor: pointer;
+                padding: 0.5rem;
+            }
+            
+            .main-content {
+                padding-top: 5rem;
+            }
+            
+            /* Overlay for sidebar */
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+                display: none;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .table-actions {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+            
+            th, td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .login-card {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .user-info {
+                justify-content: center;
+            }
+            
+            .modal {
+                margin: 0;
+                border-radius: 0;
+                max-height: 100vh;
+            }
+            
+            .modal-overlay {
+                padding: 0;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .top-bar, .btn-action, .action-buttons, .modal-overlay {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 0;
+            }
+            
+            .table-container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Section -->
+<div id="loginSection" class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-lock"></i>
+            <h2>Admin Dashboard</h2>
+            <p>Sign in to manage your portfolio messages</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+            </div>
+            
+            <button type="submit" class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Sign In</span>
+            </button>
+        </form>
+        
+        <div class="login-footer mt-3 pt-3 border-top text-center text-muted small">
+            <i class="fas fa-shield-alt"></i> Secure login with JWT authentication
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" class="dashboard">
+    <!-- Mobile Header -->
+    <div class="mobile-header" style="display: none;">
+        <button class="menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="d-flex align-items-center gap-2">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <span class="fw-semibold">Admin</span>
+        </div>
+        <button class="btn-logout btn-sm" id="mobileLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
     </div>
 
-    <script>
-      document.getElementById("load").addEventListener("click", async () => {
-        const token = document.getElementById("token").value.trim();
-        if (!token) {
-          alert("Enter token");
-          return;
-        }
-        try {
-          const res = await fetch("/api/admin/messages", {
-            headers: { "x-admin-token": token },
-          });
-          if (!res.ok) return alert("Unauthorized or error");
-          const data = await res.json();
-          const list = document.getElementById("list");
-          list.innerHTML = "";
-          data.messages.forEach((m) => {
-            const div = document.createElement("div");
-            div.className = "message";
-            div.innerHTML = `<div class="meta">#${m.id} • ${m.timestamp} • ${m.email}</div><strong>${m.name}</strong><p>${m.message}</p>`;
-            list.appendChild(div);
-          });
-        } catch (e) {
-          alert("Error loading messages");
-        }
-      });
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-      document
-        .getElementById("sendEmail")
-        .addEventListener("click", async () => {
-          const token = document.getElementById("token").value.trim();
-          if (!token) return alert("Enter admin token first");
-          const to = document.getElementById("emailTo").value.trim();
-          const subject = document.getElementById("emailSub").value.trim();
-          const text = document.getElementById("emailBody").value.trim();
-          if (!to || !subject || !text) return alert("fill all fields");
-          try {
-            const res = await fetch("/api/admin/send-email", {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-                "x-admin-token": token,
-              },
-              body: JSON.stringify({ to, subject, text }),
-            });
-            const data = await res.json();
-            if (!res.ok) return alert("Send failed: " + (data && data.message));
-            alert("Email sent");
-          } catch (e) {
-            alert("Error sending email");
-          }
-        });
-    </script>
-  </body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-chart-line"></i>
+            <h3>Dashboard</h3>
+            <button class="btn-icon ms-auto d-lg-none" id="closeSidebar" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-item">
+                <a href="#" class="nav-link active" data-view="messages">
+                    <i class="fas fa-inbox"></i>
+                    <span>Messages</span>
+                    <span class="badge bg-primary ms-auto" id="unreadBadge">0</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-view="stats">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-view="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-view="users">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold">Administrator</div>
+                    <div class="text-muted small">Super Admin</div>
+                </div>
+            </div>
+            
+            <button class="btn-logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="stat-value" id="totalMessages">0</div>
+                <div class="stat-label">Total Messages</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon unread">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="stat-value" id="unreadMessages">0</div>
+                <div class="stat-label">Unread Messages</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon replied">
+                    <i class="fas fa-reply"></i>
+                </div>
+                <div class="stat-value" id="repliedMessages">0</div>
+                <div class="stat-label">Replied Messages</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon archived">
+                    <i class="fas fa-archive"></i>
+                </div>
+                <div class="stat-value" id="archivedMessages">0</div>
+                <div class="stat-label">Archived Messages</div>
+            </div>
+        </div>
+
+        <!-- Messages Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-inbox me-2"></i> Messages</h3>
+                <div class="table-actions">
+                    <div class="dropdown">
+                        <button class="btn-action dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="filterMessages('all')">All Messages</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterMessages('new')">New Only</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterMessages('replied')">Replied</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="filterMessages('archived')">Archived</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn-action" onclick="refreshMessages()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="btn-action primary" onclick="exportMessages()">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messagesTableBody">
+                        <!-- Messages will load here -->
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Loading messages...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div id="pagination" class="p-3 border-top"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<!-- View Message Modal -->
+<div class="modal-overlay" id="viewMessageModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h4 class="mb-0">Message Details</h4>
+            <button class="btn-icon" onclick="closeModal('viewMessageModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="messageDetails">
+            <!-- Message details load here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('viewMessageModal')">Close</button>
+            <button class="btn btn-primary" onclick="replyToCurrentMessage()">
+                <i class="fas fa-reply me-2"></i> Reply
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal-overlay" id="replyModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h4 class="mb-0">Reply to Message</h4>
+            <button class="btn-icon" onclick="closeModal('replyModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="replyForm">
+                <div class="form-group mb-3">
+                    <label class="form-label">To</label>
+                    <input type="email" id="replyTo" class="form-control" readonly>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">Subject</label>
+                    <input type="text" id="replySubject" class="form-control" value="Re: Your Message" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea id="replyMessage" class="form-control" rows="6" placeholder="Type your reply..." required></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('replyModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="sendReply()">
+                <i class="fas fa-paper-plane me-2"></i> Send Reply
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="modal-overlay" id="loadingOverlay" style="display: none; align-items: center; justify-content: center;">
+    <div class="text-center">
+        <div class="spinner" style="width: 60px; height: 60px; border-width: 4px;"></div>
+        <p class="mt-3 text-white">Loading...</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="admin.js"></script>
+</body>
 </html>

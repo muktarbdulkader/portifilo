@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const nodemailer = require("nodemailer");
+const mongoose = require('mongoose')
 // optional SendGrid support (HTTP API) to avoid SMTP port blocking
 let sendgrid = null;
 if (process.env.SENDGRID_API_KEY) {
@@ -22,6 +23,23 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// MongoDB Connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ MongoDB connected successfully');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  }
+};
+
+// Connect to MongoDB
+connectDB();
+
+// Import Message model
+const Message = require('./models/Message');
 
 // Middleware
 app.use(cors());
@@ -114,13 +132,30 @@ try {
 
 // API Routes
 
-// Get all messages (for admin purposes)
-app.get("/api/messages", (req, res) => {
-  res.json({
-    success: true,
-    count: messages.length,
-    messages: messages,
-  });
+// Get all messages (for admin purposes - legacy endpoint)
+app.get("/api/messages", async (req, res) => {
+  try {
+    const token = req.headers['x-admin-token'];
+    if (!token || token !== process.env.ADMIN_TOKEN) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const allMessages = await Message.find().sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      count: allMessages.length,
+      messages: allMessages,
+    });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching messages"
+    });
+  }
 });
 
 // helper: sanitize simple text
@@ -137,10 +172,11 @@ function escapeHtml(str) {
 // Submit contact form
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
-    let { name, email, message } = req.body;
+    let { name, email, subject = '', message } = req.body;
 
     name = (name || "").trim();
     email = (email || "").trim();
+    subject = (subject || "").trim();
     message = (message || "").trim();
 
     if (!name || !email || !message) {
@@ -161,272 +197,149 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     const safeMessage = escapeHtml(message);
     const safeName = escapeHtml(name);
 
-    const newMessage = {
-      id: messageIdCounter++,
-      name: safeName,
-      email,
-      message: safeMessage,
-      timestamp: new Date().toISOString(),
-      status: "unread",
-    };
-    messages.push(newMessage);
+    try {
+      // Create and save the message to MongoDB
+      const newMessage = new Message({
+        name: safeName,
+        email: email,
+        subject: subject,
+        message: safeMessage,
+        status: 'new'
+      });
 
-    const tempFile = DATA_FILE + ".tmp";
-    fs.writeFile(tempFile, JSON.stringify(messages, null, 2), (err) => {
-      if (err) {
-        console.error("Failed to write temp messages file:", err.message);
-      } else {
-        fs.rename(tempFile, DATA_FILE, (renameErr) => {
-          if (renameErr)
-            console.error(
-              "Failed to finalize messages file:",
-              renameErr.message
-            );
-        });
-      }
-    });
+      // Save the message to the database
+      const savedMessage = await newMessage.save();
 
-    res.json({
-      success: true,
-      message: `Thank you, ${name}! Your message has been received. I'll get back to you at ${email} soon.`,
-      data: newMessage,
-      emailQueued: true,
-    });
+      // Send success response to the client immediately
+      res.json({
+        success: true,
+        message: `Thank you, ${safeName}! Your message has been received. I'll get back to you at ${email} soon.`,
+        data: savedMessage,
+        emailQueued: true,
+      });
 
-    (async (msg) => {
+      // Background email sending (non-blocking)
       try {
-        const mailOptions = {
-          from: `"Portfolio Contact" <${EMAIL_USER}>`,
-          to: EMAIL_USER, // Your inbox
-          subject: `New Contact Form Submission: ${msg.name}`,
-          html: `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
-          <div style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
-            <h2 style="color: #4F46E5; text-align:center;">📩 New Contact Form Submission</h2>
-            <p><strong>Name:</strong> ${msg.name}</p>
-            <p><strong>Email:</strong> ${msg.email}</p>
-            <p><strong>Message:</strong><br/>${msg.message}</p>
-            <hr/>
-            <p style="font-size:12px; text-align:center;">Received at: ${new Date().toLocaleString()}</p>
+        const emailContent = `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">
+            <div style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+              <h2 style="color: #4F46E5; text-align:center;">📩 New Contact Form Submission</h2>
+              <p><strong>Name:</strong> ${savedMessage.name}</p>
+              <p><strong>Email:</strong> ${savedMessage.email}</p>
+              <p><strong>Message:</strong><br/>${savedMessage.message}</p>
+              <p><strong>Subject:</strong> ${savedMessage.subject}</p>
+              <hr/>
+              <p style="font-size:12px; text-align:center;">Received at: ${new Date().toLocaleString()}</p>
+            </div>
           </div>
-        </div>
-      `,
-          replyTo: msg.email,
-        };
+        `;
 
         if (sendgrid) {
           // Use SendGrid API
           const sgMsg = {
-            to: msg.email ? EMAIL_USER : EMAIL_USER,
+            to: EMAIL_USER,
             from: EMAIL_USER,
-            subject: `New Portfolio Contact from ${msg.name}`,
-            html: `<div style="font-family: Arial, sans-serif; padding:20px;"><h2>New Contact</h2><p><strong>Name:</strong> ${msg.name}</p><p><strong>Email:</strong> ${msg.email}</p><p><strong>Message:</strong><br/>${msg.message}</p></div>`,
-            replyTo: msg.email,
+            subject: `New Portfolio Contact from ${savedMessage.name}`,
+            html: emailContent,
+            replyTo: savedMessage.email,
           };
+
           const sgRes = await sendgrid.send(sgMsg);
-          console.log(
-            "✅ SendGrid response:",
-            sgRes && sgRes[0] && sgRes[0].statusCode
-              ? sgRes[0].statusCode
-              : sgRes
-          );
+          console.log("✅ SendGrid response:", sgRes[0]?.statusCode || sgRes);
         } else {
+          // Fallback to nodemailer
+          const mailOptions = {
+            from: `"Portfolio Contact" <${EMAIL_USER}>`,
+            to: EMAIL_USER,
+            subject: `New Contact Form Submission: ${savedMessage.name}`,
+            html: emailContent,
+            replyTo: savedMessage.email,
+          };
+
           const info = await transporter.sendMail(mailOptions);
           console.log("✅ Email sent:", info.response || info);
         }
 
-        // Update message status
-        const idx = messages.findIndex((m) => m.id === msg.id);
-        if (idx !== -1) {
-          messages[idx].status = "sent";
-          fs.writeFile(DATA_FILE, JSON.stringify(messages, null, 2), (err) => {
-            if (err)
-              console.error("Failed to update message status:", err.message);
-          });
-        }
-      } catch (bgErr) {
-        console.error(
-          "⚠️ Background email sending failed:",
-          bgErr.message || bgErr
-        );
+        // Update message status in the database
+        savedMessage.status = 'sent';
+        await savedMessage.save();
+
+      } catch (emailError) {
+        console.error("⚠️ Email sending failed:", emailError.message || emailError);
+        // Update message status to failed
+        savedMessage.status = 'failed';
+        savedMessage.error = emailError.message || 'Unknown error';
+        await savedMessage.save();
       }
-    })(newMessage);
+    } catch (error) {
+      console.error("Contact form error:", error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: "An error occurred while processing your message. Please try again.",
+        });
+      }
+    }
   } catch (error) {
     console.error("Contact form error:", error);
     res.status(500).json({
       success: false,
-      message:
-        "An error occurred while processing your message. Please try again.",
+      message: "An error occurred while processing your message. Please try again.",
     });
   }
 });
 
 // Portfolio stats
-app.get("/api/stats", (req, res) => {
-  res.json({
-    success: true,
-    stats: {
-      projectsCompleted: 15,
-      yearsExperience: 3,
-      happyClients: 10,
-      cupsOfCoffee: "∞",
-      totalMessages: messages.length,
-      technologies: [
-        "HTML",
-        "CSS",
-        "JavaScript",
-        "React",
-        "Node.js",
-        "PHP",
-        "Python",
-        "Kotlin",
-      ],
-    },
-  });
-});
-
-// Admin API
-app.get("/api/admin/messages", (req, res) => {
-  const token = req.headers["x-admin-token"];
-  const expected = process.env.ADMIN_TOKEN || "";
-  if (!expected || token !== expected) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-  res.json({ success: true, count: messages.length, messages });
-});
-
-// Admin debug: verify email transporter (does not send mail) - protected
-app.get("/api/admin/debug-email", async (req, res) => {
-  const token = req.headers["x-admin-token"];
-  const expected = process.env.ADMIN_TOKEN || "";
-  if (!expected || token !== expected) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-
+app.get("/api/stats", async (req, res) => {
   try {
-    const ok = await verifyMail();
-    if (ok)
-      return res.json({
-        success: true,
-        message: "Email service OK (SendGrid or SMTP verified)",
-      });
-    return res
-      .status(500)
-      .json({ success: false, message: "Email service verification failed" });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Email service verification failed",
-        error: err && err.message ? err.message : String(err),
-      });
-  }
-});
+    const totalMessages = await Message.countDocuments();
+    const newMessages = await Message.countDocuments({ status: 'new' });
+    const repliedMessages = await Message.countDocuments({ status: { $in: ['sent', 'replied'] } });
 
-app.post("/api/admin/send-email", async (req, res) => {
-  const token = req.headers["x-admin-token"];
-  const expected = process.env.ADMIN_TOKEN || "";
-  if (!expected || token !== expected) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-
-  const { to, subject, text, html } = req.body || {};
-  if (!to || !subject || (!text && !html)) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing fields: to, subject and text/html required",
-    });
-  }
-
-  try {
-    const mailOptions = { from: EMAIL_USER, to, subject, text, html };
-    const info = await transporter.sendMail(mailOptions);
-    return res.json({ success: true, message: "Email sent", info });
-  } catch (err) {
-    console.error("Admin send-email error:", err.message || err);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send email",
-      error: err.message,
-    });
-  }
-});
-
-// Admin: resend a stored message by id (protected)
-app.post("/api/admin/resend/:id", async (req, res) => {
-  const token = req.headers["x-admin-token"];
-  const expected = process.env.ADMIN_TOKEN || "";
-  if (!expected || token !== expected) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
-
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id))
-    return res.status(400).json({ success: false, message: "Invalid id" });
-
-  const msg = messages.find((m) => m.id === id);
-  if (!msg)
-    return res
-      .status(404)
-      .json({ success: false, message: "Message not found" });
-
-  try {
-    // prepare payload
-    const html = `<div style="font-family: Arial, sans-serif; padding:20px;"><h2>Resent Contact</h2><p><strong>Name:</strong> ${msg.name}</p><p><strong>Email:</strong> ${msg.email}</p><p><strong>Message:</strong><br/>${msg.message}</p></div>`;
-
-    if (sendgrid) {
-      const sgMsg = {
-        to: EMAIL_USER,
-        from: EMAIL_USER,
-        subject: `Resent: Contact from ${msg.name}`,
-        html,
-        replyTo: msg.email,
-      };
-      const sgRes = await sendgrid.send(sgMsg);
-      console.log(
-        "Admin resend via SendGrid:",
-        sgRes && sgRes[0] && sgRes[0].statusCode
-      );
-    } else {
-      const info = await transporter.sendMail({
-        from: EMAIL_USER,
-        to: EMAIL_USER,
-        subject: `Resent: Contact from ${msg.name}`,
-        html,
-        replyTo: msg.email,
-      });
-      console.log("Admin resend via SMTP:", info && info.response);
-    }
-
-    // update message status
-    msg.status = "sent";
-    delete msg.emailError;
-    fs.writeFile(DATA_FILE, JSON.stringify(messages, null, 2), (err) => {
-      if (err)
-        console.error("Failed to persist messages after resend:", err.message);
-    });
-
-    return res.json({
+    res.json({
       success: true,
-      message: "Resend attempted, check logs for result",
-      id,
+      stats: {
+        projectsCompleted: 15,
+        yearsExperience: 3,
+        happyClients: 10,
+        cupsOfCoffee: "∞",
+        totalMessages: totalMessages,
+        newMessages: newMessages,
+        repliedMessages: repliedMessages,
+        technologies: [
+          "HTML",
+          "CSS",
+          "JavaScript",
+          "React",
+          "Node.js",
+          "PHP",
+          "Python",
+          "Kotlin",
+        ],
+      },
     });
-  } catch (err) {
-    const em = err && err.message ? err.message : String(err);
-    console.error("Admin resend failed:", em);
-    msg.status = "failed";
-    msg.emailError = em;
-    fs.writeFile(DATA_FILE, JSON.stringify(messages, null, 2), (werr) => {
-      if (werr)
-        console.error(
-          "Failed to persist messages after resend failure:",
-          werr.message
-        );
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.json({
+      success: true,
+      stats: {
+        projectsCompleted: 15,
+        yearsExperience: 3,
+        happyClients: 10,
+        cupsOfCoffee: "∞",
+        totalMessages: 0,
+        technologies: [
+          "HTML",
+          "CSS",
+          "JavaScript",
+          "React",
+          "Node.js",
+          "PHP",
+          "Python",
+          "Kotlin",
+        ],
+      },
     });
-    return res
-      .status(500)
-      .json({ success: false, message: "Resend failed", error: em });
   }
 });
 
@@ -508,13 +421,13 @@ app.get("/api/test-email", async (req, res) => {
       to: EMAIL_USER,
       subject: "Portfolio Email Test",
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>✅ Email Test Successful!</h2>
           <p>Your portfolio email configuration is working correctly.</p>
           <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
           <p><strong>Server:</strong> ${req.get("host")}</p>
         </div>
-      `,
+            `,
     };
 
     const info = await transporter.sendMail(testMailOptions);
@@ -532,6 +445,10 @@ app.get("/api/test-email", async (req, res) => {
   }
 });
 
+// Import and use admin routes
+const adminRoutes = require('./router/adminRoutes');
+app.use('/api/admin', adminRoutes);
+
 // Serve static files
 app.use(express.static(path.join(__dirname)));
 
@@ -548,6 +465,7 @@ app.get("/admin", (req, res) => {
 // 404
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Endpoint not found" });
+
 });
 
 // Error handler
@@ -565,30 +483,38 @@ app.listen(PORT, () => {
 ║                                                            ║
 ║     🚀 Portfolio Server Running Successfully!             ║
 ║                                                            ║
-║     📍 Local:    http://localhost:${PORT}                    ║
-║     📍 Admin:    http://localhost:${PORT}/admin             ║
-║     📧 Email:    ${EMAIL_USER || "Not configured"}          ║
-║     📊 Status:   Active                                   ║
+║     📍 Local: http://localhost:${PORT}                    ║
+║     📍 Admin: http://localhost:${PORT}/admin             ║
+║     📧 Email:    ${EMAIL_USER || "Not configured"}        ║
+║     📊 Status: Active                                     ║
 ║                                                            ║
 ║     Available Endpoints:                                  ║
-║     • GET  /                     - Portfolio website      ║
-║     • GET  /admin                - Admin panel           ║
-║     • GET  /api/health           - Health check          ║
-║     • GET  /api/test-email       - Test email config     ║
-║     • GET  /api/stats            - Portfolio stats       ║
-║     • GET  /api/projects         - Projects list         ║
-║     • GET  /api/messages         - All messages          ║
-║     • POST /api/contact          - Submit contact form   ║
-║     • POST /api/subscribe        - Newsletter signup     ║
+║     • GET / - Portfolio website                           ║
+║     • GET /admin - Admin panel                            ║
+║     • GET /api/health - Health check                      ║
+║     • GET /api/test-email - Test email config             ║
+║     • GET /api/stats - Portfolio stats                    ║
+║     • GET /api/projects - Projects list                   ║
+║     • GET /api/messages - All messages                    ║
+║     • POST /api/contact - Submit contact form             ║
+║     • POST /api/subscribe - Newsletter signup             ║
+║                                                            ║
+║     Admin API:                                            ║
+║     • POST /api/admin/login - Admin login                 ║
+║     • GET  /api/admin/messages - Get messages             ║
+║     • GET  /api/admin/messages/:id - Get single message   ║
+║     • PUT  /api/admin/messages/:id/status - Update status ║
+║     • DELETE /api/admin/messages/:id - Delete message     ║
+║     • POST /api/admin/send-email - Send email reply       ║
 ║                                                            ║
 ║     📝 Setup Instructions:                                ║
 ║     1. Copy env-template.txt to .env                      ║
 ║     2. Update EMAIL_USER and EMAIL_PASS in .env           ║
-║     3. Set ADMIN_TOKEN in .env                            ║
+║     3. Set ADMIN_TOKEN and JWT_SECRET in .env             ║
 ║     4. Restart server: npm start                          ║
 ║                                                            ║
 ╚════════════════════════════════════════════════════════════╝
-    `);
+          `);
 });
 
 module.exports = app;

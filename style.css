@@ -1,0 +1,572 @@
+/* ==================== MOBILE & RESPONSIVE ENHANCEMENTS ==================== */
+
+/* Base mobile optimizations */
+@media (max-width: 768px) {
+    :root {
+        --radius: 10px;
+    }
+    
+    body {
+        font-size: 15px;
+    }
+    
+    /* Login page mobile fixes */
+    .login-container {
+        padding: 16px;
+        min-height: -webkit-fill-available; /* Fix for mobile viewport */
+    }
+    
+    .login-card {
+        padding: 1.75rem 1.5rem;
+        margin: 0;
+        border-radius: var(--radius);
+        max-width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .login-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .login-header i {
+        font-size: 2.5rem;
+    }
+    
+    .login-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-control {
+        padding: 0.75rem 0.875rem;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .btn-login {
+        padding: 0.875rem;
+    }
+    
+    /* Dashboard mobile improvements */
+    .dashboard {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+    }
+    
+    .main-content {
+        padding: 1rem;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .top-bar {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+    }
+    
+    .mobile-menu-btn {
+        display: flex !important;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9rem;
+        z-index: 100;
+        position: relative;
+    }
+    
+    .top-bar-actions {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+    }
+    
+    .user-info {
+        flex-direction: row-reverse;
+        gap: 0.75rem;
+        align-items: center;
+        background: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-logout {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-logout span {
+        display: none; /* Hide text on mobile, show only icon */
+    }
+    
+    /* Stats cards mobile layout */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1.25rem;
+        min-width: 0; /* Prevent overflow */
+    }
+    
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        margin-bottom: 0.125rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .stat-trend {
+        font-size: 0.75rem;
+    }
+    
+    .stat-trend span {
+        display: none; /* Hide trend text on mobile */
+    }
+    
+    /* Table improvements for mobile */
+    .table-container {
+        padding: 0.75rem;
+        margin: 0 -1rem;
+        width: calc(100% + 2rem);
+        border-radius: 0;
+        box-shadow: none;
+        border-top: 1px solid var(--border);
+    }
+    
+    .table-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .table-header h3 {
+        font-size: 1.25rem;
+    }
+    
+    .table-actions {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .btn-action {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    /* Table becomes scrollable horizontally */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -0.75rem;
+        padding: 0 0.75rem;
+    }
+    
+    table {
+        min-width: 800px; /* Force horizontal scroll */
+    }
+    
+    th, td {
+        padding: 0.875rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    th {
+        font-size: 0.75rem;
+        padding: 0.75rem;
+    }
+    
+    .message-preview {
+        max-width: 150px;
+    }
+    
+    .action-buttons {
+        gap: 0.375rem;
+    }
+    
+    .btn-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.875rem;
+    }
+    
+    /* Sidebar mobile enhancements */
+    .sidebar {
+        width: 280px;
+        left: -280px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10000;
+    }
+    
+    .sidebar.active {
+        transform: translateX(280px);
+        left: 0;
+    }
+    
+    /* Sidebar overlay for mobile */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Modal mobile improvements */
+    .modal-overlay {
+        padding: 1rem;
+        align-items: flex-end;
+    }
+    
+    .modal {
+        max-height: 85vh;
+        border-radius: var(--radius) var(--radius) 0 0;
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1.25rem;
+    }
+    
+    /* Notification adjustments */
+    .notification {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+        top: 1rem;
+    }
+}
+
+/* Extra small phones (up to 360px) */
+@media (max-width: 360px) {
+    .login-card {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .table-header h3 {
+        font-size: 1.125rem;
+    }
+    
+    .btn-action span {
+        display: none; /* Hide button text on very small screens */
+    }
+    
+    .btn-action {
+        padding: 0.625rem;
+    }
+    
+    .btn-action i {
+        margin: 0;
+    }
+}
+
+/* Tablet landscape and smaller desktops */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
+    }
+    
+    .main-content {
+        margin-left: 240px;
+        padding: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+    
+    .table-container {
+        padding: 1.25rem;
+    }
+}
+
+/* Large tablets and small laptops */
+@media (min-width: 1025px) and (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .sidebar {
+        width: 260px;
+    }
+    
+    .main-content {
+        margin-left: 260px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase tap targets for touch devices */
+    .btn-login,
+    .btn-action,
+    .btn-icon,
+    .nav-link,
+    .btn {
+        min-height: 44px; /* Apple's recommended minimum touch target */
+    }
+    
+    .form-control {
+        min-height: 44px;
+    }
+    
+    /* Remove hover effects and replace with active states */
+    .btn-login:hover,
+    .btn-action:hover,
+    .btn-icon:hover,
+    .nav-link:hover {
+        transform: none;
+    }
+    
+    .btn-login:active,
+    .btn-action:active,
+    .btn-icon:active,
+    .nav-link:active {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+    
+    /* Improve scrolling on iOS */
+    .table-responsive,
+    .modal-body {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Prevent text selection on interactive elements */
+    .btn,
+    .nav-link,
+    .btn-action {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    }
+    
+    .login-card {
+        background: rgba(30, 41, 59, 0.95);
+        color: #e2e8f0;
+    }
+    
+    .login-header h2,
+    .form-label {
+        color: #f1f5f9;
+    }
+    
+    .login-header p {
+        color: #94a3b8;
+    }
+    
+    .form-control {
+        background: #1e293b;
+        border-color: #475569;
+        color: #f1f5f9;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+    }
+    
+    .form-control::placeholder {
+        color: #64748b;
+    }
+    
+    .login-footer p {
+        color: #94a3b8;
+    }
+}
+
+/* Print styles */
+@media print {
+    .login-container,
+    .sidebar,
+    .top-bar,
+    .table-actions,
+    .action-buttons {
+        display: none !important;
+    }
+    
+    .dashboard {
+        display: block;
+    }
+    
+    .main-content {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .stats-grid {
+        display: none;
+    }
+    
+    .table-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    table {
+        width: 100%;
+    }
+    
+    th {
+        background: #fff !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .login-card,
+    .stat-card,
+    .btn-login,
+    .btn-action,
+    .btn-icon {
+        transition: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn-login,
+    .btn-primary,
+    .btn-logout,
+    .btn-danger {
+        border: 2px solid #000;
+    }
+    
+    .form-control {
+        border-width: 2px;
+    }
+    
+    .nav-link.active {
+        border: 2px solid var(--primary);
+    }
+}
+
+/* Landscape mobile optimizations */
+@media (max-height: 600px) and (orientation: landscape) {
+    .login-container {
+        padding: 10px;
+    }
+    
+    .login-card {
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .modal {
+        max-height: 80vh;
+    }
+}
+
+/* Fix for iOS Safari 100vh issue */
+@supports (-webkit-touch-callout: none) {
+    .login-container,
+    .dashboard {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* Loading state improvements for slow networks */
+@media (prefers-reduced-data: reduce) {
+    .spinner,
+    .login-card:hover,
+    .stat-card:hover {
+        animation: none;
+        transition: none;
+    }
+    
+    .gradient-background {
+        background: #667eea;
+    }
+}
