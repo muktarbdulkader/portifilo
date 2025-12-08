@@ -1875,23 +1875,47 @@
       </div>
     </footer>
 
-   <script>
-(function () {
-  try {
-    const productionBackend = "https://muktar-portfolio.vercel.app/";
-    const localBackend = "http://localhost:3000";
+  <script>
+(async function () {
+  const localBackend = "http://localhost:3000";
+  const backends = [
+    "https://portifilo.onrender.com",      // Render backend
+    "https://muktar-dev.vercel.app"        // Vercel backend
+  ];
 
-    // Always use production when hosted (not on your computer)
-    const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-    window.API_URL = isLocal ? localBackend : productionBackend;
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
-    console.log("API URL set to:", window.API_URL);
-  } catch (e) {
-    console.warn("API URL configuration failed:", e);
-    window.API_URL = "https://muktar-portfolio.vercel.app/";
+  if (isLocal) {
+    window.API_URL = localBackend;
+    console.log("Running locally →", window.API_URL);
+    return;
   }
+
+  async function checkBackend(url) {
+    try {
+      const res = await fetch(url + "/api/health", { method: "GET" });
+      return res.ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Try each backend one by one
+  for (const url of backends) {
+    const alive = await checkBackend(url);
+    if (alive) {
+      window.API_URL = url;
+      console.log("✔ Backend active →", url);
+      return;
+    }
+  }
+
+  // If both failed → fallback to one by default
+  window.API_URL = backends[0];
+  console.warn("⚠ All checks failed, using fallback:", backends[0]);
 })();
 </script>
+
 
 
     <script src="script.js"></script>
