@@ -28,27 +28,6 @@ function auth(req, res, next) {
     }
 }
 
-// Create default admin if not exists
-async function createDefaultAdmin() {
-    try {
-        const adminCount = await Admin.countDocuments();
-        if (adminCount === 0) {
-            const defaultAdmin = new Admin({
-                username: 'admin',
-                password: 'admin123' // Will be hashed by pre-save hook
-            });
-            await defaultAdmin.save();
-            console.log('✅ Default admin user created');
-            console.log('Username: admin');
-            console.log('Password: admin123');
-            console.log('⚠️ IMPORTANT: Change this password immediately!');
-        }
-    } catch (error) {
-        console.error('Error creating default admin:', error);
-    }
-}
-createDefaultAdmin();
-
 // Admin login
 router.post('/login', async (req, res) => {
     try {

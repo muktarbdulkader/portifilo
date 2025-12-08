@@ -46,7 +46,14 @@ const connectDB = async () => {
       w: 'majority'
     };
 
-    await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI, options);
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MongoDB connection string is not defined in environment variables');
+    }
+
+    console.log('🔗 Connecting to MongoDB...');
+    await mongoose.connect(mongoUri, options);
+    console.log('✅ Successfully connected to MongoDB');
 
     isConnected = true;
     connectionAttempts = 0;
