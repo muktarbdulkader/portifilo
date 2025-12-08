@@ -44,26 +44,35 @@ const DOM = {
 
 // API Configuration
 function getApiUrl() {
+  // Allow overriding via window.API_URL if needed
   if (window.API_URL) return window.API_URL;
 
+  // Development environment
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
     return "http://localhost:3000";
   }
 
   const hostname = window.location.hostname;
 
+  // For Vercel deployment - use the same domain for both frontend and backend
+  if (hostname.includes("vercel.app")) {
+    return `https://${hostname}`;  // This will be your Vercel deployment URL
+  }
+
+  // For other hosting providers
   if (hostname.includes("render.com")) {
-    return "https://portifilo.onrender.com";
+    return `https://${hostname}`;
   }
 
   if (hostname.includes("herokuapp.com")) {
     return `https://${hostname}`;
   }
 
-  if (hostname.includes("netlify.app") || hostname.includes("vercel.app")) {
-    return "https://your-backend-url.com";
+  if (hostname.includes("netlify.app")) {
+    return `https://${hostname}`;
   }
 
+  // Default to same origin
   return window.location.origin;
 }
 
@@ -408,28 +417,48 @@ async function handleFormSubmit(e) {
   showLoading();
   const submitButton = DOM.contactForm.querySelector('button[type="submit"]');
   submitButton.classList.add("loading");
+  submitButton.disabled = true;
 
   try {
     const response = await fetch(`${API_URL}/api/contact`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      credentials: 'include',
       body: JSON.stringify(data)
     });
 
     let result;
     try {
       result = await response.json();
-    } catch {
-      result = { success: response.ok };
+    } catch (error) {
+      console.error('Error parsing JSON response:', error);
+      result = {
+        success: false,
+        message: 'Error processing server response'
+      };
+    }
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to send message');
     }
 
     handleFormResponse(response, result, data);
 
+    // Reset form on success
+    if (result.success) {
+      DOM.contactForm.reset();
+    }
+
   } catch (error) {
-    handleFormError(error);
+    console.error('Form submission error:', error);
+    showToast(error.message || 'Failed to send message. Please try again later.', 'error');
   } finally {
     hideLoading();
     submitButton.classList.remove("loading");
+    submitButton.disabled = false;
   }
 }
 

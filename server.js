@@ -201,7 +201,17 @@ async function verifyMail() {
 verifyMail();
 
 // ================== MIDDLEWARE ==================
-app.use(cors());
+const corsOptions = {
+  origin: [
+    'https://muktar-dev.vercel.app',  // Your Vercel domain
+    'http://localhost:3000'           // For local development
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
