@@ -42,34 +42,41 @@ const DOM = {
   statValues: document.querySelectorAll(".stat-value")
 };
 
-// API Configuration
+// API Configuration - FIXED VERSION
 function getApiUrl() {
-  // Allow overriding via window.API_URL if needed
-  if (window.API_URL) return window.API_URL;
+  // Check if backend URL is explicitly set
+  if (window.BACKEND_URL) {
+    return window.BACKEND_URL;
+  }
 
   // Development environment
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    return "http://localhost:3000";
+    return "http://localhost:3000";  // Backend runs on port 3000
   }
 
+  // For production - both frontend and backend on same domain
   const hostname = window.location.hostname;
 
-  // For Vercel deployment - use the same domain for both frontend and backend
+  // Vercel deployment
   if (hostname.includes("vercel.app")) {
-    return `https://${hostname}`;  // This will be your Vercel deployment URL
-  }
-
-  // For other hosting providers
-  if (hostname.includes("render.com")) {
     return `https://${hostname}`;
   }
 
+  // Render deployment
+  if (hostname.includes("onrender.com")) {
+    return `https://${hostname}`;
+  }
+
+  // Heroku deployment
   if (hostname.includes("herokuapp.com")) {
     return `https://${hostname}`;
   }
 
+  // Netlify deployment (need separate backend)
   if (hostname.includes("netlify.app")) {
-    return `https://${hostname}`;
+    // You need to set window.BACKEND_URL in your HTML for Netlify
+    console.warn("Backend URL not set for Netlify. Please add: <script>window.BACKEND_URL = 'https://your-backend-url.com';</script>");
+    return window.location.origin;
   }
 
   // Default to same origin
@@ -77,6 +84,12 @@ function getApiUrl() {
 }
 
 const API_URL = getApiUrl();
+
+// Debug: Log API configuration
+console.log("🌐 API Configuration:");
+console.log("API_URL:", API_URL);
+console.log("Frontend Host:", window.location.hostname);
+console.log("Full Frontend URL:", window.location.href);
 
 // ==========================
 // Initialization
@@ -381,7 +394,7 @@ function startTypingAnimation(element) {
 }
 
 // ==========================
-// Form Handling
+// Form Handling - FIXED VERSION
 // ==========================
 function initializeFormValidation() {
   if (!DOM.contactForm) return;
@@ -420,21 +433,35 @@ async function handleFormSubmit(e) {
   submitButton.disabled = true;
 
   try {
+    console.log("📤 Sending contact form to:", `${API_URL}/api/contact`);
+    console.log("Data being sent:", {
+      name: data.name,
+      email: data.email,
+      subject: data.subject || '',
+      message: data.message
+    });
+
+    // FIXED: Using correct API endpoint
     const response = await fetch(`${API_URL}/api/contact`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      credentials: 'include',
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+        subject: data.subject || '',
+        message: data.message
+      })
     });
 
     let result;
     try {
       result = await response.json();
+      console.log("📥 Server response:", result);
     } catch (error) {
-      console.error('Error parsing JSON response:', error);
+      console.error('❌ Error parsing JSON response:', error);
       result = {
         success: false,
         message: 'Error processing server response'
@@ -442,18 +469,29 @@ async function handleFormSubmit(e) {
     }
 
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to send message');
+      throw new Error(result.message || `Server error (${response.status})`);
     }
 
-    handleFormResponse(response, result, data);
-
-    // Reset form on success
     if (result.success) {
+      // Success
+      showToast(result.message || "Message sent successfully!", "success");
       DOM.contactForm.reset();
+
+      // Success animation
+      DOM.contactForm.classList.add("animate__animated", "animate__pulse");
+      setTimeout(() => {
+        DOM.contactForm.classList.remove("animate__animated", "animate__pulse");
+      }, 1000);
+
+      // Log success
+      console.log("✅ Message sent successfully. Message ID:", result.data?.id);
+    } else {
+      // Server returned success: false
+      showToast(result.message || "Failed to send message", "error");
     }
 
   } catch (error) {
-    console.error('Form submission error:', error);
+    console.error('❌ Form submission error:', error);
     showToast(error.message || 'Failed to send message. Please try again later.', 'error');
   } finally {
     hideLoading();
@@ -477,41 +515,6 @@ function validateFormData(data) {
   }
 
   return true;
-}
-
-function handleFormResponse(response, result, data) {
-  if (!response.ok) {
-    console.error("Server error:", response.status, result);
-    showToast(result?.message || `Server error (${response.status})`, "error");
-    return;
-  }
-
-  if (result?.success) {
-    showToast(result.message || "Message sent successfully!", "success");
-    DOM.contactForm.reset();
-
-    // Success animation
-    DOM.contactForm.classList.add("animate__animated", "animate__pulse");
-    setTimeout(() => {
-      DOM.contactForm.classList.remove("animate__animated", "animate__pulse");
-    }, 1000);
-  } else {
-    showToast(result?.message || "Failed to send message", "error");
-  }
-}
-
-function handleFormError(error) {
-  console.error("Form submission failed:", error);
-
-  let errorMessage = "An error occurred. Please try again.";
-
-  if (error.name === "TypeError" && error.message.includes("fetch")) {
-    errorMessage = "Cannot connect to server. Please check your connection.";
-  } else if (error.name === "AbortError") {
-    errorMessage = "Request timeout. Please try again.";
-  }
-
-  showToast(errorMessage, "error");
 }
 
 // ==========================
@@ -669,7 +672,7 @@ function showThemeToast(theme) {
   const toast = document.createElement("div");
   toast.className = "toast success show";
   toast.innerHTML = `
-    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
     </svg>
     <span>${themeNames[theme] || "Theme"} activated! 🎨</span>
@@ -972,17 +975,17 @@ function openContactModal() {
 }
 
 // ==========================
-// Backend Connection
+// Backend Connection - FIXED VERSION
 // ==========================
 async function testBackendConnection() {
   try {
-    console.log("🔍 Testing backend connection...");
+    console.log("🔍 Testing backend connection to:", `${API_URL}/api/health`);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CONFIG.apiCheckTimeout);
 
     const response = await fetch(`${API_URL}/api/health`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Accept": "application/json" },
       signal: controller.signal
     });
 
@@ -1268,6 +1271,10 @@ function showDeveloperMessage() {
     "font-size: 14px; font-weight: bold; color: #7C3AED;"
   );
   console.log(
+    "%c  GET  /api/health    - Health check",
+    "font-size: 12px; color: #666;"
+  );
+  console.log(
     "%c  GET  /api/stats     - Portfolio statistics",
     "font-size: 12px; color: #666;"
   );
@@ -1279,22 +1286,60 @@ function showDeveloperMessage() {
     "%c  POST /api/contact   - Contact form",
     "font-size: 12px; color: #666;"
   );
+  console.log(
+    "%c  POST /api/subscribe - Newsletter",
+    "font-size: 12px; color: #666;"
+  );
+  console.log(
+    "%cCurrent API URL: " + API_URL,
+    "font-size: 12px; color: #666; font-weight: bold;"
+  );
 }
 
 // ==========================
-// Load Stats from Backend
+// Load Stats from Backend - FIXED VERSION
 // ==========================
 async function loadStats() {
   try {
+    console.log("📊 Loading portfolio stats from:", `${API_URL}/api/stats`);
     const response = await fetch(`${API_URL}/api/stats`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load stats: ${response.status}`);
+    }
+
     const data = await response.json();
 
     if (data.success) {
-      console.log("Portfolio stats loaded:", data.stats);
+      console.log("✅ Portfolio stats loaded:", data.stats);
+      // You can update the UI with these stats if needed
+      return data.stats;
+    } else {
+      console.log("⚠️ Using static stats (server returned success: false)");
+      return getStaticStats();
     }
   } catch (error) {
-    console.log("Using static stats");
+    console.log("❌ Using static stats (fetch failed):", error.message);
+    return getStaticStats();
   }
+}
+
+function getStaticStats() {
+  return {
+    projectsCompleted: 15,
+    yearsExperience: 3,
+    happyClients: 10,
+    cupsOfCoffee: "∞",
+    messages: {
+      total: 0,
+      new: 0,
+      sent: 0
+    },
+    technologies: [
+      "HTML", "CSS", "JavaScript", "React",
+      "Node.js", "PHP", "Python", "Kotlin",
+    ],
+  };
 }
 
 // ==========================
@@ -1350,6 +1395,28 @@ function registerServiceWorker() {
 }
 
 // ==========================
+// Test API Connection Function
+// ==========================
+async function testAPIConnection() {
+  console.log("🧪 Testing all API endpoints...");
+
+  const endpoints = [
+    '/api/health',
+    '/api/stats',
+    '/api/projects'
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`);
+      console.log(`${endpoint}: ${response.ok ? '✅ OK' : '❌ Failed'} (${response.status})`);
+    } catch (error) {
+      console.log(`${endpoint}: ❌ Error - ${error.message}`);
+    }
+  }
+}
+
+// ==========================
 // Main Initialization
 // ==========================
 document.addEventListener("DOMContentLoaded", () => {
@@ -1363,6 +1430,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeSocialSharing();
   initializeEasterEgg();
   registerServiceWorker();
+
+  // Optional: Test API connection
+  // setTimeout(() => testAPIConnection(), 2000);
 });
 
 // Make functions available globally for HTML onclick attributes
@@ -1381,3 +1451,13 @@ window.toggleMobileMenu = function () {
     APP_STATE.isMobileMenuOpen = true;
   }
 };
+
+// Export for debugging
+if (window) {
+  window.portfolioAPI = {
+    url: API_URL,
+    testConnection: testBackendConnection,
+    loadStats: loadStats,
+    submitForm: handleFormSubmit
+  };
+}

@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const mongoose = require('mongoose');
 const path = require("path");
 const fs = require("fs");
+const adminRoutes = require('./router/adminRoutes');
 require("dotenv").config();
 
 const app = express();
@@ -201,15 +202,34 @@ async function verifyMail() {
 verifyMail();
 
 // ================== MIDDLEWARE ==================
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://muktar-dev.vercel.app',
+  'https://www.muktar-dev.vercel.app'
+];
+
 const corsOptions = {
-  origin: [
-    'https://muktar-dev.vercel.app',  // Your Vercel domain
-    'http://localhost:3000'           // For local development
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = `The CORS policy for this site does not allow access from the specified origin: ${origin}`;
+      console.warn(msg);
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
+
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -227,15 +247,17 @@ const contactLimiter = rateLimit({
   }
 });
 
-// ================== API ROUTES ==================
-
-// Health check
-app.get("/api/health", async (req, res) => {
+// Health check endpoint
+app.get('/api/health', (req, res) => {
   const dbStatus = isConnected && mongoose.connection.readyState === 1;
-  const emailStatus = !!(EMAIL_USER && EMAIL_PASS);
+  const emailStatus = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
-  res.json({
-    success: true,
+  const status = dbStatus && emailStatus ? 'ok' : 'degraded';
+  const statusCode = status === 'ok' ? 200 : 503;
+
+  res.status(statusCode).json({
+    status: status,
+    message: status === 'ok' ? 'All systems operational' : 'Service degraded',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     services: {
@@ -545,8 +567,6 @@ app.get("/api/test-email", async (req, res) => {
   }
 });
 
-// Import admin routes
-const adminRoutes = require('./router/adminRoutes');
 app.use('/api/admin', ensureDBConnection, adminRoutes);
 
 // ================== STATIC FILES & FRONTEND ==================
