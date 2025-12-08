@@ -1005,25 +1005,6 @@ async function testBackendConnection() {
   }
 }
 
-// function showBackendWarning() {
-//   const contactSection = document.querySelector("#contact");
-//   if (!contactSection) return;
-
-//   const warning = document.createElement("div");
-//   warning.className = "backend-warning";
-//   warning.innerHTML = `
-//     <p>⚠️ Backend server connection failed.</p>
-//     <small>Running in offline mode. Contact form submissions will be saved locally.</small>
-//   `;
-
-//   contactSection.prepend(warning);
-
-//   // Auto-remove after 10 seconds
-//   setTimeout(() => {
-//     warning.style.opacity = "0";
-//     setTimeout(() => warning.remove(), 300);
-//   }, 10000);
-// }
 
 // ==========================
 // Utility Functions
