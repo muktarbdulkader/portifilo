@@ -534,20 +534,17 @@ app.use('/api/admin', ensureDBConnection, adminRoutes);
 
 // ================== STATIC FILES & FRONTEND ==================
 
-// Serve static files from root directory
-app.use(express.static(path.join(__dirname)));
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve static files from image directory
-app.use('/image', express.static(path.join(__dirname, 'image')));
-
-// Serve index.html
+// Serve index.html for root route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "public", 'index.html'));
 });
 
-// Serve admin.html
+// Serve admin.html for /admin route
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html"));
+  res.sendFile(path.join(__dirname, "public", 'admin.html'));
 });
 
 // Newsletter endpoint
