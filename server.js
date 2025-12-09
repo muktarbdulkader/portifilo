@@ -206,7 +206,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'https://muktar-dev.vercel.app',
-  'https://www.muktar-dev.vercel.app'
+  'https://portifilo.onrender.com/'
 ];
 
 const corsOptions = {
