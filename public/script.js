@@ -244,9 +244,6 @@ function initializeScrollEffects() {
 
     // Active navigation based on scroll
     updateActiveNavigation();
-
-    // Floating CTA visibility
-    updateFloatingCTA();
   }
 
   // Optimized scroll handler with requestAnimationFrame
@@ -836,145 +833,6 @@ function openBlogModal(index) {
 }
 
 // ==========================
-// Floating CTA
-// ==========================
-function initializeFloatingCTA() {
-  if (document.querySelector(".floating-cta") || localStorage.getItem("ctaDismissed") === "1") return;
-
-  const cta = document.createElement("a");
-  cta.href = "#contact";
-  cta.className = "floating-cta pulse-glow hide";
-  cta.setAttribute("aria-label", "Call Muktar");
-  cta.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.63A2 2 0 0 1 4.09 2h3a2 2 0 0 1 2 1.72c.12 1.21.38 2.39.76 3.5a2 2 0 0 1-.45 2.11L8.91 11.09a16 16 0 0 0 6 6l1.76-1.8a2 2 0 0 1 2.11-.45c1.11.38 2.29.64 3.5.76A2 2 0 0 1 22 16.92z"/>
-    </svg>
-  `;
-
-  cta.addEventListener("click", openContactModal);
-  document.body.appendChild(cta);
-
-  // Intersection Observer for contact section
-  const contactSection = document.getElementById("contact");
-  if (contactSection) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            cta.classList.add("hide");
-          } else if (window.scrollY > 120) {
-            cta.classList.remove("hide");
-          }
-        });
-      },
-      { threshold: 0.25 }
-    );
-
-    observer.observe(contactSection);
-  }
-}
-
-function updateFloatingCTA() {
-  const cta = document.querySelector(".floating-cta");
-  if (!cta) return;
-
-  if (window.scrollY < 120) {
-    cta.classList.add("hide");
-  } else {
-    const contactSection = document.getElementById("contact");
-    if (!contactSection) {
-      cta.classList.remove("hide");
-    }
-  }
-}
-
-function openContactModal() {
-  if (document.querySelector(".contact-modal-overlay")) return;
-
-  const overlay = document.createElement("div");
-  overlay.className = "contact-modal-overlay";
-
-  const modal = document.createElement("div");
-  modal.className = "contact-modal";
-
-  const title = document.createElement("h3");
-  title.textContent = "Contact Muktar";
-
-  const nameItem = document.createElement("div");
-  nameItem.className = "contact-item";
-  nameItem.innerHTML = `<strong>Name</strong><span>Muktar</span>`;
-
-  const phoneNumber = "+251916662982";
-  const tgLink = "https://t.me/MuktiAbdu";
-
-  const actions = document.createElement("div");
-  actions.className = "contact-actions";
-
-  const callAnchor = document.createElement("a");
-  callAnchor.className = "call";
-  callAnchor.href = `tel:${phoneNumber}`;
-  callAnchor.textContent = "Call";
-
-  const tgAnchor = document.createElement("a");
-  tgAnchor.className = "tg";
-  tgAnchor.href = tgLink;
-  tgAnchor.target = "_blank";
-  tgAnchor.rel = "noopener noreferrer";
-  tgAnchor.textContent = "Open Telegram";
-
-  const copyBtn = document.createElement("button");
-  copyBtn.className = "copy";
-  copyBtn.textContent = "Copy Number";
-  copyBtn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(phoneNumber);
-      showToast("Phone number copied to clipboard", "success");
-    } catch (err) {
-      showToast("Copy failed. Please copy manually.", "error");
-    }
-  });
-
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "modal-close";
-  closeBtn.innerHTML = "&times;";
-  closeBtn.addEventListener("click", () => {
-    overlay.classList.remove("show");
-    setTimeout(() => overlay.remove(), 200);
-  });
-
-  actions.appendChild(callAnchor);
-  actions.appendChild(tgAnchor);
-  actions.appendChild(copyBtn);
-
-  modal.appendChild(closeBtn);
-  modal.appendChild(title);
-  modal.appendChild(nameItem);
-  modal.appendChild(actions);
-
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
-
-  requestAnimationFrame(() => overlay.classList.add("show"));
-
-  overlay.addEventListener("click", (ev) => {
-    if (ev.target === overlay) {
-      overlay.classList.remove("show");
-      setTimeout(() => overlay.remove(), 200);
-    }
-  });
-
-  function onKey(e) {
-    if (e.key === "Escape") {
-      overlay.classList.remove("show");
-      document.removeEventListener("keydown", onKey);
-      setTimeout(() => overlay.remove(), 200);
-    }
-  }
-
-  document.addEventListener("keydown", onKey);
-}
-
-// ==========================
 // Backend Connection - FIXED VERSION
 // ==========================
 async function testBackendConnection() {
@@ -1004,26 +862,6 @@ async function testBackendConnection() {
     return false;
   }
 }
-
-// function showBackendWarning() {
-//   const contactSection = document.querySelector("#contact");
-//   if (!contactSection) return;
-
-//   const warning = document.createElement("div");
-//   warning.className = "backend-warning";
-//   warning.innerHTML = `
-//     <p>⚠️ Backend server connection failed.</p>
-//     <small>Running in offline mode. Contact form submissions will be saved locally.</small>
-//   `;
-
-//   contactSection.prepend(warning);
-
-//   // Auto-remove after 10 seconds
-//   setTimeout(() => {
-//     warning.style.opacity = "0";
-//     setTimeout(() => warning.remove(), 300);
-//   }, 10000);
-// }
 
 // ==========================
 // Utility Functions
@@ -1424,7 +1262,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeThemeToggle();
   initializeProjectFilter();
   initializeModals();
-  initializeFloatingCTA();
   initializeHoverEffects();
   initializeDownloadCV();
   initializeSocialSharing();
