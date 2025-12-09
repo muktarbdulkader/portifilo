@@ -42,7 +42,7 @@ const DOM = {
   statValues: document.querySelectorAll(".stat-value")
 };
 
-// API Configuration - FIXED VERSION
+// API Configuration
 function getApiUrl() {
   // Check if backend URL is explicitly set
   if (window.BACKEND_URL) {
@@ -51,7 +51,7 @@ function getApiUrl() {
 
   // Development environment
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    return "http://localhost:3000";  // Backend runs on port 3000
+    return "http://localhost:3000";
   }
 
   // For production - both frontend and backend on same domain
@@ -67,29 +67,11 @@ function getApiUrl() {
     return `https://${hostname}`;
   }
 
-  // Heroku deployment
-  if (hostname.includes("herokuapp.com")) {
-    return `https://${hostname}`;
-  }
-
-  // Netlify deployment (need separate backend)
-  if (hostname.includes("netlify.app")) {
-    // You need to set window.BACKEND_URL in your HTML for Netlify
-    console.warn("Backend URL not set for Netlify. Please add: <script>window.BACKEND_URL = 'https://your-backend-url.com';</script>");
-    return window.location.origin;
-  }
-
   // Default to same origin
   return window.location.origin;
 }
 
 const API_URL = getApiUrl();
-
-// Debug: Log API configuration
-console.log("🌐 API Configuration:");
-console.log("API_URL:", API_URL);
-console.log("Frontend Host:", window.location.hostname);
-console.log("Full Frontend URL:", window.location.href);
 
 // ==========================
 // Initialization
@@ -110,10 +92,9 @@ function initializeApp() {
   initializeParticleSystem();
   initializeEventListeners();
 
-  // Test backend connection
+  // Test backend connection silently
   testBackendConnection().then(connected => {
     APP_STATE.isBackendConnected = connected;
-    if (!connected) showBackendWarning();
   });
 
   // Load stats
@@ -391,7 +372,7 @@ function startTypingAnimation(element) {
 }
 
 // ==========================
-// Form Handling - FIXED VERSION
+// Form Handling
 // ==========================
 function initializeFormValidation() {
   if (!DOM.contactForm) return;
@@ -430,15 +411,6 @@ async function handleFormSubmit(e) {
   submitButton.disabled = true;
 
   try {
-    console.log("📤 Sending contact form to:", `${API_URL}/api/contact`);
-    console.log("Data being sent:", {
-      name: data.name,
-      email: data.email,
-      subject: data.subject || '',
-      message: data.message
-    });
-
-    // FIXED: Using correct API endpoint
     const response = await fetch(`${API_URL}/api/contact`, {
       method: "POST",
       headers: {
@@ -456,9 +428,7 @@ async function handleFormSubmit(e) {
     let result;
     try {
       result = await response.json();
-      console.log("📥 Server response:", result);
     } catch (error) {
-      console.error('❌ Error parsing JSON response:', error);
       result = {
         success: false,
         message: 'Error processing server response'
@@ -470,26 +440,28 @@ async function handleFormSubmit(e) {
     }
 
     if (result.success) {
-      // Success
       showToast(result.message || "Message sent successfully!", "success");
       DOM.contactForm.reset();
 
-      // Success animation
       DOM.contactForm.classList.add("animate__animated", "animate__pulse");
       setTimeout(() => {
         DOM.contactForm.classList.remove("animate__animated", "animate__pulse");
       }, 1000);
-
-      // Log success
-      console.log("✅ Message sent successfully. Message ID:", result.data?.id);
     } else {
-      // Server returned success: false
       showToast(result.message || "Failed to send message", "error");
     }
 
   } catch (error) {
-    console.error('❌ Form submission error:', error);
-    showToast(error.message || 'Failed to send message. Please try again later.', 'error');
+    // Save form data locally when offline
+    saveFormDataLocally(data);
+    showToast('Message saved locally!', 'success');
+    DOM.contactForm.reset();
+
+    DOM.contactForm.classList.add("animate__animated", "animate__pulse");
+    setTimeout(() => {
+      DOM.contactForm.classList.remove("animate__animated", "animate__pulse");
+    }, 1000);
+
   } finally {
     hideLoading();
     submitButton.classList.remove("loading");
@@ -707,10 +679,6 @@ function initializeProjectFilter() {
           project.style.display = "none";
         }
       });
-
-      // Update active button (optional)
-      // DOM.filterButtons.forEach(btn => btn.classList.remove("active"));
-      // button.classList.add("active");
     });
   });
 }
@@ -833,11 +801,10 @@ function openBlogModal(index) {
 }
 
 // ==========================
-// Backend Connection - FIXED VERSION
+// Backend Connection
 // ==========================
 async function testBackendConnection() {
   try {
-    console.log("🔍 Testing backend connection to:", `${API_URL}/api/health`);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CONFIG.apiCheckTimeout);
 
@@ -850,15 +817,11 @@ async function testBackendConnection() {
     clearTimeout(timeoutId);
 
     if (response.ok) {
-      const data = await response.json();
-      console.log("✅ Backend connection successful:", data);
       return true;
     } else {
-      console.error("❌ Backend connection failed:", response.status);
       return false;
     }
   } catch (error) {
-    console.error("❌ Backend connection error:", error.message);
     return false;
   }
 }
@@ -1055,6 +1018,67 @@ function initializeSocialSharing() {
 }
 
 // ==========================
+// Local Storage for Offline Forms
+// ==========================
+function saveFormDataLocally(data) {
+  try {
+    const savedForms = JSON.parse(localStorage.getItem('pendingForms') || '[]');
+
+    savedForms.push({
+      ...data,
+      timestamp: new Date().toISOString(),
+      id: Date.now()
+    });
+
+    localStorage.setItem('pendingForms', JSON.stringify(savedForms));
+
+  } catch (error) {
+    console.error('Error saving form locally:', error);
+  }
+}
+
+// ==========================
+// Load Stats
+// ==========================
+async function loadStats() {
+  try {
+    const response = await fetch(`${API_URL}/api/stats`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load stats: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      return data.stats;
+    } else {
+      return getStaticStats();
+    }
+  } catch (error) {
+    return getStaticStats();
+  }
+}
+
+function getStaticStats() {
+  return {
+    projectsCompleted: 15,
+    yearsExperience: 3,
+    happyClients: 10,
+    cupsOfCoffee: "∞",
+    messages: {
+      total: 0,
+      new: 0,
+      sent: 0
+    },
+    technologies: [
+      "HTML", "CSS", "JavaScript", "React",
+      "Node.js", "PHP", "Python", "Kotlin",
+    ],
+  };
+}
+
+// ==========================
 // Easter Egg & Fun Features
 // ==========================
 function initializeEasterEgg() {
@@ -1077,7 +1101,7 @@ function initializeEasterEgg() {
         document.body.style.animation = "";
       }, 5000);
 
-      konami = []; // Reset
+      konami = [];
     }
   });
 
@@ -1104,80 +1128,6 @@ function showDeveloperMessage() {
     "%cThis portfolio is built with vanilla HTML, CSS, and JavaScript!",
     "font-size: 14px; color: #7C3AED;"
   );
-  console.log(
-    "%cAPI Endpoints:",
-    "font-size: 14px; font-weight: bold; color: #7C3AED;"
-  );
-  console.log(
-    "%c  GET  /api/health    - Health check",
-    "font-size: 12px; color: #666;"
-  );
-  console.log(
-    "%c  GET  /api/stats     - Portfolio statistics",
-    "font-size: 12px; color: #666;"
-  );
-  console.log(
-    "%c  GET  /api/projects  - Projects list",
-    "font-size: 12px; color: #666;"
-  );
-  console.log(
-    "%c  POST /api/contact   - Contact form",
-    "font-size: 12px; color: #666;"
-  );
-  console.log(
-    "%c  POST /api/subscribe - Newsletter",
-    "font-size: 12px; color: #666;"
-  );
-  console.log(
-    "%cCurrent API URL: " + API_URL,
-    "font-size: 12px; color: #666; font-weight: bold;"
-  );
-}
-
-// ==========================
-// Load Stats from Backend - FIXED VERSION
-// ==========================
-async function loadStats() {
-  try {
-    console.log("📊 Loading portfolio stats from:", `${API_URL}/api/stats`);
-    const response = await fetch(`${API_URL}/api/stats`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to load stats: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.success) {
-      console.log("✅ Portfolio stats loaded:", data.stats);
-      // You can update the UI with these stats if needed
-      return data.stats;
-    } else {
-      console.log("⚠️ Using static stats (server returned success: false)");
-      return getStaticStats();
-    }
-  } catch (error) {
-    console.log("❌ Using static stats (fetch failed):", error.message);
-    return getStaticStats();
-  }
-}
-
-function getStaticStats() {
-  return {
-    projectsCompleted: 15,
-    yearsExperience: 3,
-    happyClients: 10,
-    cupsOfCoffee: "∞",
-    messages: {
-      total: 0,
-      new: 0,
-      sent: 0
-    },
-    technologies: [
-      "HTML", "CSS", "JavaScript", "React",
-      "Node.js", "PHP", "Python", "Kotlin",
-    ],
-  };
 }
 
 // ==========================
@@ -1216,45 +1166,6 @@ function initializeEventListeners() {
 }
 
 // ==========================
-// Service Worker for Offline Support
-// ==========================
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-          console.log('Service Worker registered:', registration);
-        })
-        .catch(error => {
-          console.log('Service Worker registration failed:', error);
-        });
-    });
-  }
-}
-
-// ==========================
-// Test API Connection Function
-// ==========================
-async function testAPIConnection() {
-  console.log("🧪 Testing all API endpoints...");
-
-  const endpoints = [
-    '/api/health',
-    '/api/stats',
-    '/api/projects'
-  ];
-
-  for (const endpoint of endpoints) {
-    try {
-      const response = await fetch(`${API_URL}${endpoint}`);
-      console.log(`${endpoint}: ${response.ok ? '✅ OK' : '❌ Failed'} (${response.status})`);
-    } catch (error) {
-      console.log(`${endpoint}: ❌ Error - ${error.message}`);
-    }
-  }
-}
-
-// ==========================
 // Main Initialization
 // ==========================
 document.addEventListener("DOMContentLoaded", () => {
@@ -1266,10 +1177,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeDownloadCV();
   initializeSocialSharing();
   initializeEasterEgg();
-  registerServiceWorker();
-
-  // Optional: Test API connection
-  // setTimeout(() => testAPIConnection(), 2000);
 });
 
 // Make functions available globally for HTML onclick attributes
@@ -1288,13 +1195,3 @@ window.toggleMobileMenu = function () {
     APP_STATE.isMobileMenuOpen = true;
   }
 };
-
-// Export for debugging
-if (window) {
-  window.portfolioAPI = {
-    url: API_URL,
-    testConnection: testBackendConnection,
-    loadStats: loadStats,
-    submitForm: handleFormSubmit
-  };
-}
