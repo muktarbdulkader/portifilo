@@ -2,7 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Page not found - Muktar Abdulkader Portfolio. The page you're looking for doesn't exist. Return to the main portfolio site.">
+    <meta name="keywords" content="404, page not found, Muktar Abdulkader, portfolio, error page">
+    <meta name="author" content="Muktar Abdulkader">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/image/logom.png">
+    <link rel="apple-touch-icon" href="/image/logom.png">
+    
     <title>404 - Page Not Found | Muktar Abdulkader</title>
     <style>
         * {
@@ -67,21 +85,116 @@
             line-height: 1.6;
         }
 
+        .error-suggestions {
+            margin: 2rem 0;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-suggestions h3 {
+            color: #00f5ff;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .error-suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .error-suggestions li {
+            padding: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .error-suggestions li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #00f5ff;
+            font-weight: bold;
+        }
+
+        .error-suggestions a {
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .error-suggestions a:hover {
+            text-decoration: underline;
+            filter: brightness(1.2);
+        }
+
+        .error-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             padding: 1rem 2rem;
-            background: linear-gradient(135deg, #00f5ff, #8b5cf6);
             color: #fff;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s ease;
+            border: 2px solid transparent;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00f5ff, #8b5cf6);
             box-shadow: 0 4px 15px rgba(0, 245, 255, 0.3);
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0, 245, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #00f5ff;
+            color: #00f5ff;
+        }
+
+        .btn-outline:hover {
+            background: #00f5ff;
+            color: #0a0a0f;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 280px;
+            }
         }
 
         .particles {
@@ -110,6 +223,318 @@
             50% { transform: translateY(-200px) translateX(-50px); }
             75% { transform: translateY(-100px) translateX(50px); }
         }
+
+        /* Ripple effect */
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Loading state for better UX */
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Focus states for accessibility */
+        .btn:focus {
+            outline: 2px solid #00f5ff;
+            outline-offset: 2px;
+        }
+
+        /* Improved responsive design */
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        /* AI Smart Suggestions */
+        .ai-smart-suggestions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-suggestion-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .ai-icon {
+            font-size: 1.5rem;
+        }
+
+        .ai-suggestion-header h3 {
+            color: #00f5ff;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .ai-suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ai-suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.2);
+        }
+
+        .suggestion-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .suggestion-text {
+            flex: 1;
+        }
+
+        .suggestion-text strong {
+            display: block;
+            color: #00f5ff;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .suggestion-text p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .suggestion-confidence {
+            background: rgba(0, 245, 255, 0.2);
+            color: #00f5ff;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Language Notice */
+        .language-notice {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .lang-notice-content h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .lang-notice-content p {
+            margin: 0 0 15px 0;
+            opacity: 0.9;
+        }
+
+        .lang-redirect-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .lang-redirect-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* AI Search */
+        .ai-404-search {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-404-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .search-404-header h3 {
+            color: #00f5ff;
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .search-404-header p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .search-404-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #ai-404-search {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #ai-404-search:focus {
+            border-color: #00f5ff;
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+        }
+
+        #ai-404-search::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #search-404-btn {
+            background: linear-gradient(135deg, #00f5ff, #8b5cf6);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        #search-404-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
+        }
+
+        .search-404-suggestions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-404-suggestions span {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .search-tag {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-tag:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: #00f5ff;
+            transform: translateY(-1px);
+        }
+
+        /* Mobile responsiveness for AI features */
+        @media (max-width: 768px) {
+            .ai-suggestion-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .search-404-input {
+                flex-direction: column;
+            }
+
+            .search-404-suggestions {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .search-404-suggestions span {
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,7 +544,39 @@
         <div class="error-code">404</div>
         <h1>Oops! Page Not Found</h1>
         <p>The page you're looking for seems to have wandered off into the digital void. Let's get you back on track!</p>
-        <a href="/" class="btn">Back to Home</a>
+        
+        <div class="error-suggestions">
+            <h3>Here are some suggestions:</h3>
+            <ul>
+                <li>Check if the URL is spelled correctly</li>
+                <li>Go back to the <a href="/" style="color: #00f5ff;">homepage</a></li>
+                <li>Browse my <a href="/#projects" style="color: #8b5cf6;">latest projects</a></li>
+                <li>Get in <a href="/#contact" style="color: #ec4899;">touch with me</a></li>
+            </ul>
+        </div>
+        
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Back to Home
+            </a>
+            <a href="/#projects" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                View Projects
+            </a>
+            <a href="/#contact" class="btn btn-outline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                Contact Me
+            </a>
+        </div>
     </div>
 
     <script>
@@ -134,6 +591,288 @@
             particle.style.animationDuration = (5 + Math.random() * 10) + 's';
             particlesContainer.appendChild(particle);
         }
+
+        // Add click effect to buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Auto-redirect after 30 seconds (optional)
+        let countdown = 30;
+        const redirectTimer = setInterval(() => {
+            countdown--;
+            if (countdown <= 0) {
+                clearInterval(redirectTimer);
+                window.location.href = '/';
+            }
+        }, 1000);
+
+        // Clear timer if user interacts with the page
+        document.addEventListener('click', () => {
+            clearInterval(redirectTimer);
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                document.querySelector('.btn-primary').click();
+            } else if (e.key === 'Escape') {
+                window.history.back();
+            }
+        });
+
+        // AI-Powered Smart Suggestions for 404 Page
+        class AI404Assistant {
+            constructor() {
+                this.urlAnalysis = this.analyzeURL();
+                this.userBehavior = this.loadUserBehavior();
+                this.init();
+            }
+
+            init() {
+                this.addSmartSuggestions();
+                this.addLanguageDetection();
+                this.trackUserBehavior();
+            }
+
+            analyzeURL() {
+                const url = window.location.pathname;
+                const analysis = {
+                    isProject: /project|work|portfolio/i.test(url),
+                    isContact: /contact|hire|email/i.test(url),
+                    isSkills: /skill|tech|ability/i.test(url),
+                    isAbout: /about|bio|info/i.test(url),
+                    isBlog: /blog|article|post/i.test(url),
+                    language: this.detectLanguageFromURL(url)
+                };
+                return analysis;
+            }
+
+            detectLanguageFromURL(url) {
+                if (url.includes('/es/') || url.includes('/spanish/')) return 'es';
+                if (url.includes('/fr/') || url.includes('/french/')) return 'fr';
+                if (url.includes('/ar/') || url.includes('/arabic/')) return 'ar';
+                return 'en';
+            }
+
+            addSmartSuggestions() {
+                const suggestions = this.generateSmartSuggestions();
+                if (suggestions.length === 0) return;
+
+                const aiSuggestions = document.createElement('div');
+                aiSuggestions.className = 'ai-smart-suggestions';
+                aiSuggestions.innerHTML = `
+                    <div class="ai-suggestion-header">
+                        <span class="ai-icon">🤖</span>
+                        <h3>AI Suggestions</h3>
+                    </div>
+                    <div class="ai-suggestion-content">
+                        ${suggestions.map(suggestion => `
+                            <div class="ai-suggestion-item" data-link="${suggestion.link}">
+                                <div class="suggestion-icon">${suggestion.icon}</div>
+                                <div class="suggestion-text">
+                                    <strong>${suggestion.title}</strong>
+                                    <p>${suggestion.description}</p>
+                                </div>
+                                <div class="suggestion-confidence">${suggestion.confidence}%</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                document.querySelector('.container').appendChild(aiSuggestions);
+
+                // Add click handlers
+                aiSuggestions.querySelectorAll('.ai-suggestion-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        window.location.href = item.dataset.link;
+                    });
+                });
+            }
+
+            generateSmartSuggestions() {
+                const suggestions = [];
+
+                if (this.urlAnalysis.isProject) {
+                    suggestions.push({
+                        icon: '🚀',
+                        title: 'Projects Section',
+                        description: 'You were looking for projects. Check out the portfolio!',
+                        link: '/#projects',
+                        confidence: 95
+                    });
+                }
+
+                if (this.urlAnalysis.isContact) {
+                    suggestions.push({
+                        icon: '💬',
+                        title: 'Contact Information',
+                        description: 'Get in touch directly through the contact form',
+                        link: '/#contact',
+                        confidence: 90
+                    });
+                }
+
+                if (this.urlAnalysis.isSkills) {
+                    suggestions.push({
+                        icon: '⚡',
+                        title: 'Technical Skills',
+                        description: 'Explore the comprehensive skills and expertise',
+                        link: '/#skills',
+                        confidence: 88
+                    });
+                }
+
+                // Add behavior-based suggestions
+                if (this.userBehavior.visitedProjects) {
+                    suggestions.push({
+                        icon: '🔄',
+                        title: 'Back to Projects',
+                        description: 'Return to the projects you were viewing',
+                        link: '/#projects',
+                        confidence: 85
+                    });
+                }
+
+                return suggestions.slice(0, 2); // Show top 2 suggestions
+            }
+
+            addLanguageDetection() {
+                if (this.urlAnalysis.language !== 'en') {
+                    this.showLanguageMessage();
+                }
+            }
+
+            showLanguageMessage() {
+                const messages = {
+                    es: {
+                        title: '¡Página no encontrada!',
+                        message: 'La página que buscas no existe. Te redirigiremos a la página principal.',
+                        button: 'Ir al inicio'
+                    },
+                    fr: {
+                        title: 'Page non trouvée!',
+                        message: 'La page que vous cherchez n\'existe pas. Nous vous redirigerons vers la page d\'accueil.',
+                        button: 'Aller à l\'accueil'
+                    },
+                    ar: {
+                        title: 'الصفحة غير موجودة!',
+                        message: 'الصفحة التي تبحث عنها غير موجودة. سنوجهك إلى الصفحة الرئيسية.',
+                        button: 'الذهاب للرئيسية'
+                    }
+                };
+
+                const langMessage = messages[this.urlAnalysis.language];
+                if (!langMessage) return;
+
+                const languageNotice = document.createElement('div');
+                languageNotice.className = 'language-notice';
+                languageNotice.innerHTML = `
+                    <div class="lang-notice-content">
+                        <h3>${langMessage.title}</h3>
+                        <p>${langMessage.message}</p>
+                        <button class="lang-redirect-btn" onclick="window.location.href='/'">
+                            ${langMessage.button}
+                        </button>
+                    </div>
+                `;
+
+                document.querySelector('.container').insertBefore(
+                    languageNotice, 
+                    document.querySelector('.error-suggestions')
+                );
+            }
+
+            trackUserBehavior() {
+                // Track this 404 visit
+                const behavior = this.loadUserBehavior();
+                behavior.notFoundVisits = (behavior.notFoundVisits || 0) + 1;
+                behavior.lastNotFoundURL = window.location.pathname;
+                behavior.timestamp = Date.now();
+
+                localStorage.setItem('user404Behavior', JSON.stringify(behavior));
+            }
+
+            loadUserBehavior() {
+                try {
+                    return JSON.parse(localStorage.getItem('user404Behavior')) || {};
+                } catch {
+                    return {};
+                }
+            }
+        }
+
+        // Initialize AI 404 Assistant
+        new AI404Assistant();
+
+        // Add AI-powered search suggestions
+        function addAISearch() {
+            const searchContainer = document.createElement('div');
+            searchContainer.className = 'ai-404-search';
+            searchContainer.innerHTML = `
+                <div class="search-404-header">
+                    <h3>🔍 Can't find what you're looking for?</h3>
+                    <p>Try searching the portfolio:</p>
+                </div>
+                <div class="search-404-input">
+                    <input type="text" id="ai-404-search" placeholder="Search for projects, skills, or content...">
+                    <button id="search-404-btn">Search</button>
+                </div>
+                <div class="search-404-suggestions">
+                    <span>Popular searches:</span>
+                    <button class="search-tag" data-search="React projects">React</button>
+                    <button class="search-tag" data-search="AI projects">AI/ML</button>
+                    <button class="search-tag" data-search="Contact info">Contact</button>
+                </div>
+            `;
+
+            document.querySelector('.error-suggestions').appendChild(searchContainer);
+
+            // Add search functionality
+            const searchInput = document.getElementById('ai-404-search');
+            const searchBtn = document.getElementById('search-404-btn');
+
+            function performSearch() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Redirect to main site with search parameter
+                    window.location.href = `/?search=${encodeURIComponent(query)}`;
+                }
+            }
+
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            // Search tag functionality
+            document.querySelectorAll('.search-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    searchInput.value = tag.dataset.search;
+                    performSearch();
+                });
+            });
+        }
+
+        // Add AI search after a short delay
+        setTimeout(addAISearch, 1000);
     </script>
 </body>
 </html>

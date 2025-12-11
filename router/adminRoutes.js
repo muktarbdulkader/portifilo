@@ -4,7 +4,9 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/admin');
 const Message = require('../models/Message');
+const chatbot=require('./../models/ChatConversation')
 const nodemailer = require('nodemailer');
+
 
 // Middleware to check token
 function auth(req, res, next) {
@@ -116,6 +118,7 @@ router.get('/messages', auth, async (req, res) => {
     }
 });
 
+
 // Get single message
 router.get('/messages/:id', auth, async (req, res) => {
     try {
@@ -138,6 +141,26 @@ router.get('/messages/:id', auth, async (req, res) => {
         });
     }
 });
+router.get('/chatconversation' ,auth, async(req,res)=>{
+    try{
+        const chatbot=await chatbot.find()
+      .sort({createdAt:-1})
+        res.status(200).json({
+            status:'sucess',
+            data:{
+                chatbot
+            }
+
+        })
+    }catch(err){
+    res.status(404).json({
+        status:'fail',
+        message:err.message
+
+    })
+}
+}) 
+
 
 // Update message status
 router.put('/messages/:id/status', auth, async (req, res) => {
@@ -184,6 +207,7 @@ router.put('/messages/:id/status', auth, async (req, res) => {
         });
     }
 });
+
 
 // Delete message
 router.delete('/messages/:id', auth, async (req, res) => {

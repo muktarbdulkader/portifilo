@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "title": "Muktar Abdulkader - Full Stack Software Engineer | Portfolio",
+    "description": "Muktar Abdulkader - Full Stack Software Engineer specializing in Web Development, AI/ML, Cybersecurity, and Graphic Design. Building innovative solutions with React, Node.js, Python, and modern technologies.",
+    "keywords": "Muktar Abdulkader, Software Engineer, Full Stack Developer, Web Developer, React Developer, Node.js, Python, AI ML, Cybersecurity, Graphic Designer, Canva Designer, Ethiopia Developer, Haramaya University"
+  },
+  "nav": {
+    "about": "About",
+    "skills": "Skills", 
+    "services": "Services",
+    "projects": "Projects",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "name": "Muktar Abdulkader",
+    "title": "Software Engineer",
+    "availability": "Available for Hire",
+    "response_time": "Responds in 24hrs",
+    "stats": {
+      "projects": "Projects",
+      "experience": "Years Exp",
+      "satisfaction": "Satisfaction"
+    },
+    "description": "Software Engineering student specializing in <span class=\"highlight\">frontend development</span>, <span class=\"highlight-purple\">canva designer</span>, and <span class=\"highlight-pink\">AI-powered solutions</span>.",
+    "subtitle": "Currently in my 4th year at Haramaya University, building innovative projects that solve real-world problems with cutting-edge technologies.",
+    "buttons": {
+      "contact": "Get In Touch",
+      "projects": "View My Work",
+      "download_cv": "Download CV"
+    }
+  },
+  "stats": {
+    "projects_completed": "Projects Completed",
+    "years_experience": "Years Experience", 
+    "happy_clients": "Happy Clients",
+    "cups_coffee": "Cups of Coffee"
+  },
+  "about": {
+    "badge": "About Me",
+    "title": "Crafting Digital Experiences",
+    "description": "Learn more about my background, skills, and what drives me as a developer",
+    "content": {
+      "paragraph1": "I'm a 4th-year Software Engineering student at <span class=\"highlight\">Haramaya University</span> with a strong passion for creating innovative digital solutions. My journey in tech has led me to explore various domains including frontend development, mobile applications, artificial intelligence, and cybersecurity.",
+      "paragraph2": "Beyond coding, I'm also experienced in canva designer and freelancing, which has taught me valuable skills in client communication, project management, and creative problem-solving. I'm always eager to learn new technologies and take on challenging projects that make a real impact."
+    },
+    "highlights": {
+      "experience": {
+        "title": "Professional Experience",
+        "description": "Freelance canvas designer, collaborative academic projects, and hands-on web & mobile app development with real clients."
+      },
+      "projects": {
+        "title": "Notable Projects", 
+        "description": "Course Registration System, Staff Evaluation App, AI Recommender System, Intelligent Time Management Assistant."
+      },
+      "achievements": {
+        "title": "Achievements",
+        "description": "Top performer in academic projects, successful freelance engagements, and multiple deployed applications serving real users."
+      }
+    }
+  },
+  "education": {
+    "badge": "Education & Certifications",
+    "title": "Academic Background",
+    "description": "My educational journey and professional certifications",
+    "timeline": {
+      "university": {
+        "date": "2021 - Present",
+        "title": "Bachelor of Science in Software Engineering",
+        "institution": "Haramaya University, Ethiopia",
+        "description": "Currently in 4th year, specializing in web development, mobile applications, artificial intelligence, and cybersecurity. Maintaining excellent academic performance with hands-on project experience.",
+        "note": "📊 GPA and achievements will be added soon"
+      },
+      "certifications": {
+        "date": "Coming Soon",
+        "title": "Professional Certifications",
+        "institution": "Various Platforms",
+        "description": "Currently pursuing professional certifications in web development, cloud computing, and software engineering. Details will be added as completed."
+      }
+    }
+  },
+  "skills": {
+    "badge": "Technical Skills",
+    "title": "Skills & Expertise",
+    "description": "A comprehensive overview of my technical skills and areas of expertise",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend", 
+      "mobile": "Mobile Development",
+      "database": "Database",
+      "tools": "Tools & Others"
+    }
+  },
+  "contact": {
+    "badge": "Get In Touch",
+    "title": "Let's Work Together",
+    "description": "Have a project in mind? Let's discuss how we can bring your ideas to life.",
+    "form": {
+      "name": "Your Name",
+      "email": "Your Email",
+      "subject": "Subject",
+      "message": "Your Message",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "success": "Message sent successfully!",
+      "error": "Failed to send message. Please try again."
+    },
+    "info": {
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location",
+      "response": "Response Time"
+    }
+  },
+  "footer": {
+    "copyright": "© 2024 Muktar Abdulkader. All rights reserved.",
+    "built_with": "Built with ❤️ using modern web technologies"
+  },
+  "404": {
+    "title": "Oops! Page Not Found",
+    "description": "The page you're looking for seems to have wandered off into the digital void. Let's get you back on track!",
+    "suggestions": {
+      "title": "Here are some suggestions:",
+      "check_url": "Check if the URL is spelled correctly",
+      "go_home": "Go back to the homepage",
+      "browse_projects": "Browse my latest projects", 
+      "get_in_touch": "Get in touch with me"
+    },
+    "buttons": {
+      "home": "Back to Home",
+      "projects": "View Projects",
+      "contact": "Contact Me"
+    }
+  }
+}

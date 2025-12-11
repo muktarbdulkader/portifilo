@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Debug</title>
+    <link rel="stylesheet" href="ai-chatbot.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <h1>🤖 Chatbot Debug Panel</h1>
+        
+        <div id="loadStatus" class="status info">
+            ⏳ Checking chatbot status...
+        </div>
+
+        <h3>Diagnostic Information:</h3>
+        <div id="diagnostics"></div>
+
+        <h3>Console Logs:</h3>
+        <pre id="consoleLogs"></pre>
+
+        <h3>Actions:</h3>
+        <button onclick="checkChatbot()">Check Chatbot</button>
+        <button onclick="testChatbot()">Test Chatbot</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <button onclick="location.reload()">Reload Page</button>
+    </div>
+
+    <script>
+        window.API_URL = 'http://localhost:3000';
+        
+        let logs = [];
+        
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            logs.push({ type: 'log', message: args.join(' '), time: new Date().toLocaleTimeString() });
+            updateLogs();
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            logs.push({ type: 'error', message: args.join(' '), time: new Date().toLocaleTimeString() });
+            updateLogs();
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            logs.push({ type: 'warn', message: args.join(' '), time: new Date().toLocaleTimeString() });
+            updateLogs();
+            originalWarn.apply(console, args);
+        };
+        
+        function updateLogs() {
+            const logsEl = document.getElementById('consoleLogs');
+            logsEl.textContent = logs.map(log => 
+                `[${log.time}] ${log.type.toUpperCase()}: ${log.message}`
+            ).join('\n');
+        }
+        
+        function clearLogs() {
+            logs = [];
+            updateLogs();
+        }
+        
+        function checkChatbot() {
+            const diagnostics = document.getElementById('diagnostics');
+            const status = document.getElementById('loadStatus');
+            
+            let html = '<ul>';
+            
+            // Check if chatbot object exists
+            if (typeof window.aiChatbot !== 'undefined') {
+                html += '<li class="success">✅ window.aiChatbot exists</li>';
+                html += `<li class="info">📊 Session ID: ${window.aiChatbot.sessionId}</li>`;
+                html += `<li class="info">👤 User ID: ${window.aiChatbot.userId}</li>`;
+            } else {
+                html += '<li class="error">❌ window.aiChatbot is undefined</li>';
+            }
+            
+            // Check if chatbot button exists
+            const chatbotButton = document.getElementById('chatbotToggle');
+            if (chatbotButton) {
+                html += '<li class="success">✅ Chatbot button found in DOM</li>';
+                html += `<li class="info">📍 Button display: ${getComputedStyle(chatbotButton).display}</li>`;
+                html += `<li class="info">📍 Button visibility: ${getComputedStyle(chatbotButton).visibility}</li>`;
+            } else {
+                html += '<li class="error">❌ Chatbot button NOT found in DOM</li>';
+            }
+            
+            // Check if chatbot container exists
+            const chatbotContainer = document.getElementById('aiChatbot');
+            if (chatbotContainer) {
+                html += '<li class="success">✅ Chatbot container found</li>';
+            } else {
+                html += '<li class="error">❌ Chatbot container NOT found</li>';
+            }
+            
+            // Check if CSS is loaded
+            const styles = document.styleSheets;
+            let cssLoaded = false;
+            for (let i = 0; i < styles.length; i++) {
+                if (styles[i].href && styles[i].href.includes('ai-chatbot.css')) {
+                    cssLoaded = true;
+                    break;
+                }
+            }
+            html += cssLoaded 
+                ? '<li class="success">✅ ai-chatbot.css loaded</li>'
+                : '<li class="error">❌ ai-chatbot.css NOT loaded</li>';
+            
+            // Check if JS is loaded
+            const scripts = document.scripts;
+            let jsLoaded = false;
+            for (let i = 0; i < scripts.length; i++) {
+                if (scripts[i].src && scripts[i].src.includes('ai-chatbot.js')) {
+                    jsLoaded = true;
+                    break;
+                }
+            }
+            html += jsLoaded 
+                ? '<li class="success">✅ ai-chatbot.js loaded</li>'
+                : '<li class="error">❌ ai-chatbot.js NOT loaded</li>';
+            
+            html += '</ul>';
+            diagnostics.innerHTML = html;
+            
+            // Update status
+            if (window.aiChatbot && chatbotButton) {
+                status.className = 'status success';
+                status.textContent = '✅ Chatbot is loaded and ready!';
+            } else {
+                status.className = 'status error';
+                status.textContent = '❌ Chatbot failed to load properly';
+            }
+        }
+        
+        function testChatbot() {
+            if (window.aiChatbot) {
+                console.log('Testing chatbot...');
+                window.aiChatbot.toggleChat();
+                console.log('Chatbot toggled!');
+            } else {
+                console.error('Chatbot not available');
+                alert('Chatbot is not loaded. Check the diagnostics above.');
+            }
+        }
+        
+        // Auto-check on load
+        setTimeout(checkChatbot, 1000);
+    </script>
+    
+    <script src="ai-chatbot.js"></script>
+    <script src="chatbot-notification.js"></script>
+</body>
+</html>

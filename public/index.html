@@ -47,6 +47,7 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/ai-chatbot.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     
     <!-- Google Analytics (Replace with your tracking ID) -->
@@ -1877,7 +1878,6 @@
 
   <script>
 (async function () {
-  const localBackend = "http://localhost:3000";
   const backends = [
     "https://portifilo.onrender.com",      // Render backend
     "https://muktar-dev.vercel.app"        // Vercel backend
@@ -1918,6 +1918,12 @@
 
 
 
-    <script src="script.js"></script>
+    <script src="chatbot-notification.js" defer></script>
+    <script src="script.js" defer></script>
+    <script src="ai-chatbot.js" defer></script>
+    
   </body>
 </html>
+
+
+

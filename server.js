@@ -9,6 +9,8 @@ const adminRoutes = require('./router/adminRoutes');
 require("dotenv").config();
 
 const app = express();
+
+// Request Logger Middleware
 const PORT = process.env.PORT || 3000;
 
 // ================== ENHANCED MONGODB CONNECTION ==================
@@ -129,6 +131,7 @@ const ensureDBConnection = async (req, res, next) => {
 
 // Import Message model
 const Message = require('./models/Message');
+const ChatConversation = require('./models/ChatConversation');
 
 // ================== GMAIL APP PASSWORD CONFIGURATION ==================
 // Sanitize env values
@@ -157,6 +160,7 @@ if (!EMAIL_USER || !EMAIL_PASS) {
   console.log('   EMAIL_USER="your-email@gmail.com"');
   console.log('   EMAIL_PASS="your-16-character-app-password"');
 }
+
 
 // Gmail transporter with proper configuration
 const transporter = nodemailer.createTransport({
@@ -205,6 +209,10 @@ verifyMail();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5500',
+  'http://127.0.0.1:5501',
+  'http://127.0.0.1:5502',
   'https://muktar-dev.vercel.app',
   'https://portifilo.onrender.com/'
 ];
@@ -231,9 +239,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rate limiting
 const contactLimiter = rateLimit({
@@ -569,10 +576,341 @@ app.get("/api/test-email", async (req, res) => {
 
 app.use('/api/admin', ensureDBConnection, adminRoutes);
 
+// ================== AI CHATBOT ENDPOINTS ==================
+
+// Start or get chatbot conversation
+app.post("/api/chatbot/conversation", ensureDBConnection, async (req, res) => {
+  try {
+    const { sessionId, userId, metadata } = req.body;
+
+    // Check if conversation exists
+    let conversation = await ChatConversation.findOne({ sessionId, userId });
+
+    if (!conversation) {
+      // Create new conversation
+      conversation = new ChatConversation({
+        sessionId,
+        userId,
+        metadata: {
+          userAgent: req.headers['user-agent'],
+          language: req.headers['accept-language'],
+          referrer: req.headers['referer'],
+          ...metadata
+        }
+      });
+      await conversation.save();
+      console.log('🤖 New chatbot conversation started:', sessionId);
+    }
+
+    res.json({
+      success: true,
+      conversationId: conversation._id,
+      sessionId: conversation.sessionId
+    });
+  } catch (error) {
+    console.error("Chatbot conversation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error starting conversation"
+    });
+  }
+});
+
+// Save chatbot message
+app.post("/api/chatbot/message", ensureDBConnection, async (req, res) => {
+  try {
+    const { sessionId, userId, role, content } = req.body;
+
+    if (!sessionId || !userId || !role || !content) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields"
+      });
+    }
+
+    // Find conversation
+    let conversation = await ChatConversation.findOne({ sessionId, userId });
+
+    if (!conversation) {
+      // Create if doesn't exist
+      conversation = new ChatConversation({
+        sessionId,
+        userId,
+        metadata: {
+          userAgent: req.headers['user-agent']
+        }
+      });
+    }
+
+    // Add message
+    conversation.messages.push({
+      role,
+      content,
+      timestamp: new Date()
+    });
+
+    // Update analytics
+    conversation.analytics.totalMessages = conversation.messages.length;
+    conversation.analytics.userMessages = conversation.messages.filter(m => m.role === 'user').length;
+    conversation.analytics.botMessages = conversation.messages.filter(m => m.role === 'bot').length;
+
+    // Extract topics from user messages
+    if (role === 'user') {
+      const topics = extractTopics(content);
+      conversation.analytics.topics = [...new Set([...conversation.analytics.topics, ...topics])];
+    }
+
+    await conversation.save();
+
+    res.json({
+      success: true,
+      message: "Message saved",
+      conversationId: conversation._id
+    });
+  } catch (error) {
+    console.error("Chatbot message error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error saving message"
+    });
+  }
+});
+
+// Get conversation history
+app.get("/api/chatbot/conversation/:sessionId", ensureDBConnection, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { userId } = req.query;
+
+    const conversation = await ChatConversation.findOne({ sessionId, userId });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      conversation: {
+        sessionId: conversation.sessionId,
+        messages: conversation.messages,
+        analytics: conversation.analytics,
+        createdAt: conversation.createdAt
+      }
+    });
+  } catch (error) {
+    console.error("Get conversation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching conversation"
+    });
+  }
+});
+
+// End conversation
+app.post("/api/chatbot/end", ensureDBConnection, async (req, res) => {
+  try {
+    const { sessionId, userId, satisfaction } = req.body;
+
+    const conversation = await ChatConversation.findOne({ sessionId, userId });
+
+    if (conversation) {
+      conversation.status = 'ended';
+      if (satisfaction) {
+        conversation.analytics.satisfaction = satisfaction;
+      }
+
+      // Calculate duration
+      if (conversation.messages.length > 0) {
+        const firstMsg = conversation.messages[0].timestamp;
+        const lastMsg = conversation.messages[conversation.messages.length - 1].timestamp;
+        conversation.analytics.duration = lastMsg - firstMsg;
+      }
+
+      await conversation.save();
+      console.log('🤖 Conversation ended:', sessionId);
+    }
+
+    res.json({
+      success: true,
+      message: "Conversation ended"
+    });
+  } catch (error) {
+    console.error("End conversation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error ending conversation"
+    });
+  }
+});
+
+// Get chatbot analytics (admin only)
+app.get("/api/chatbot/analytics", ensureDBConnection, async (req, res) => {
+  try {
+    const token = req.headers['x-admin-token'];
+    if (!token || token !== process.env.ADMIN_TOKEN) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    const totalConversations = await ChatConversation.countDocuments();
+    const activeConversations = await ChatConversation.countDocuments({ status: 'active' });
+    const endedConversations = await ChatConversation.countDocuments({ status: 'ended' });
+
+    // Get total messages
+    const conversations = await ChatConversation.find();
+    const totalMessages = conversations.reduce((sum, conv) => sum + conv.messages.length, 0);
+
+    // Get popular topics
+    const allTopics = conversations.flatMap(conv => conv.analytics.topics || []);
+    const topicCounts = {};
+    allTopics.forEach(topic => {
+      topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+    });
+    const popularTopics = Object.entries(topicCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([topic, count]) => ({ topic, count }));
+
+    // Average satisfaction
+    const satisfactionScores = conversations
+      .filter(c => c.analytics.satisfaction)
+      .map(c => c.analytics.satisfaction);
+    const avgSatisfaction = satisfactionScores.length > 0
+      ? satisfactionScores.reduce((a, b) => a + b, 0) / satisfactionScores.length
+      : 0;
+
+    res.json({
+      success: true,
+      analytics: {
+        totalConversations,
+        activeConversations,
+        endedConversations,
+        totalMessages,
+        averageMessagesPerConversation: totalConversations > 0 ? totalMessages / totalConversations : 0,
+        popularTopics,
+        averageSatisfaction: Math.round(avgSatisfaction * 10) / 10
+      }
+    });
+  } catch (error) {
+    console.error("Chatbot analytics error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching analytics"
+    });
+  }
+});
+
+// Helper function to extract topics from message
+function extractTopics(message) {
+  const topics = [];
+  const lowerMessage = message.toLowerCase();
+
+  const topicKeywords = {
+    'skills': ['skill', 'technology', 'tech', 'programming', 'language'],
+    'projects': ['project', 'work', 'portfolio', 'built', 'created'],
+    'experience': ['experience', 'background', 'years', 'worked'],
+    'education': ['education', 'university', 'study', 'degree'],
+    'services': ['service', 'offer', 'help', 'hire'],
+    'contact': ['contact', 'email', 'phone', 'reach'],
+    'availability': ['available', 'hire', 'freelance']
+  };
+
+  for (const [topic, keywords] of Object.entries(topicKeywords)) {
+    if (keywords.some(keyword => lowerMessage.includes(keyword))) {
+      topics.push(topic);
+    }
+  }
+
+  return topics;
+}
+
+// ================== AI ANALYTICS ENDPOINTS ==================
+
+// Track analytics event
+app.post("/api/analytics/event", async (req, res) => {
+  try {
+    const event = req.body;
+
+    // Store event in database or process it
+    console.log('📊 Analytics Event:', event.type);
+
+    res.json({
+      success: true,
+      message: "Event tracked successfully"
+    });
+  } catch (error) {
+    console.error("Analytics event error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error tracking event"
+    });
+  }
+});
+
+// Track session data
+app.post("/api/analytics/session", ensureDBConnection, async (req, res) => {
+  try {
+    const { sessionId, userId, sessionData, userBehavior, aiInsights } = req.body;
+
+    // Store session data in database
+    console.log('📊 Session Data:', {
+      sessionId,
+      userId,
+      duration: sessionData.duration,
+      engagementScore: sessionData.engagementScore
+    });
+
+    res.json({
+      success: true,
+      message: "Session data saved successfully"
+    });
+  } catch (error) {
+    console.error("Session data error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error saving session data"
+    });
+  }
+});
+
+// Get analytics dashboard data (admin only)
+app.get("/api/analytics/dashboard", async (req, res) => {
+  try {
+    const token = req.headers['x-admin-token'];
+    if (!token || token !== process.env.ADMIN_TOKEN) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
+    }
+
+    // Return aggregated analytics data
+    res.json({
+      success: true,
+      data: {
+        totalVisitors: 0,
+        avgEngagementScore: 0,
+        topSections: [],
+        conversionRate: 0,
+        userIntents: {}
+      }
+    });
+  } catch (error) {
+    console.error("Analytics dashboard error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching analytics"
+    });
+  }
+});
+
 // ================== STATIC FILES & FRONTEND ==================
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve index.html for root route
 app.get("/", (req, res) => {
@@ -583,6 +921,7 @@ app.get("/", (req, res) => {
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", 'admin.html'));
 });
+
 
 // Newsletter endpoint
 app.post("/api/subscribe", (req, res) => {

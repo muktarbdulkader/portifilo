@@ -816,6 +816,13 @@
                     <span>Users</span>
                 </a>
             </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-view="chatbot">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Chatbot</span>
+                    <span class="badge bg-success ms-auto">New</span>
+                </a>
+            </div>
         </nav>
     </div>
 
@@ -931,6 +938,105 @@
             
             <!-- Pagination -->
             <div id="pagination" class="p-3 border-top"></div>
+        </div>
+
+        <!-- AI Chatbot Analytics Section -->
+        <div id="chatbotSection" class="chatbot-analytics" style="display: none;">
+            <h2 class="mb-4"><i class="fas fa-robot me-2"></i> AI Chatbot Analytics</h2>
+            
+            <!-- Chatbot Stats -->
+            <div class="stats-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-value" id="totalConversations">0</div>
+                    <div class="stat-label">Total Conversations</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="stat-value" id="totalChatMessages">0</div>
+                    <div class="stat-label">Total Messages</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-value" id="avgMessagesPerConv">0</div>
+                    <div class="stat-label">Avg Messages/Conv</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                    <div class="stat-value" id="avgSatisfaction">0</div>
+                    <div class="stat-label">Avg Satisfaction</div>
+                </div>
+            </div>
+
+            <!-- Popular Topics -->
+            <div class="table-container mb-4">
+                <div class="table-header">
+                    <h3><i class="fas fa-fire me-2"></i> Popular Topics</h3>
+                    <button class="btn-action" onclick="refreshChatbotAnalytics()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div id="popularTopicsChart" class="mb-3"></div>
+                    <div id="popularTopicsList"></div>
+                </div>
+            </div>
+
+            <!-- Recent Conversations -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-history me-2"></i> Recent Conversations</h3>
+                    <div class="table-actions">
+                        <button class="btn-action" onclick="refreshConversations()">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Refresh</span>
+                        </button>
+                        <button class="btn-action primary" onclick="exportConversations()">
+                            <i class="fas fa-download"></i>
+                            <span>Export</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Session ID</th>
+                                <th>User ID</th>
+                                <th>Messages</th>
+                                <th>Topics</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conversationsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="loading">
+                                        <div class="spinner"></div>
+                                        <p>Loading conversations...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

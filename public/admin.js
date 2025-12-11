@@ -717,3 +717,207 @@ document.addEventListener('DOMContentLoaded', function () {
     // Make loadMessages globally accessible for retry button
     window.loadMessages = loadMessages;
 });
+
+
+// ==================== AI CHATBOT ANALYTICS ====================
+
+// Load chatbot analytics
+async function loadChatbotAnalytics() {
+    try {
+        const authToken = localStorage.getItem('adminToken');
+        const response = await fetch(`${window.location.origin}/api/chatbot/analytics`, {
+            headers: {
+                'x-admin-token': authToken
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            const analytics = data.analytics;
+            
+            // Update stats
+            document.getElementById('totalConversations').textContent = analytics.totalConversations || 0;
+            document.getElementById('totalChatMessages').textContent = analytics.totalMessages || 0;
+            document.getElementById('avgMessagesPerConv').textContent = 
+                analytics.averageMessagesPerConversation ? analytics.averageMessagesPerConversation.toFixed(1) : '0';
+            document.getElementById('avgSatisfaction').textContent = 
+                analytics.averageSatisfaction ? analytics.averageSatisfaction.toFixed(1) : 'N/A';
+            
+            // Display popular topics
+            displayPopularTopics(analytics.popularTopics || []);
+            
+            // Load recent conversations
+            loadRecentConversations();
+        }
+    } catch (error) {
+        console.error('Error loading chatbot analytics:', error);
+        showNotification('Failed to load chatbot analytics', 'error');
+    }
+}
+
+// Display popular topics
+function displayPopularTopics(topics) {
+    const topicsList = document.getElementById('popularTopicsList');
+    
+    if (!topics || topics.length === 0) {
+        topicsList.innerHTML = '<p class="text-muted text-center">No topics data available</p>';
+        return;
+    }
+    
+    const maxCount = Math.max(...topics.map(t => t.count));
+    
+    topicsList.innerHTML = topics.map(topic => `
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-semibold text-capitalize">${escapeHtml(topic.topic)}</span>
+                <span class="badge bg-primary">${topic.count}</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-gradient" 
+                     style="width: ${(topic.count / maxCount) * 100}%; background: linear-gradient(90deg, #667eea, #764ba2);">
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Load recent conversations
+async function loadRecentConversations() {
+    try {
+        const authToken = localStorage.getItem('adminToken');
+        const tbody = document.getElementById('conversationsTableBody');
+        
+        // Show loading
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading conversations...</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        // Note: You'll need to create an endpoint to list all conversations
+        // For now, showing placeholder
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Conversation history will appear here
+                </td>
+            </tr>
+        `;
+        
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+        document.getElementById('conversationsTableBody').innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Failed to load conversations
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Refresh chatbot analytics
+function refreshChatbotAnalytics() {
+    loadChatbotAnalytics();
+    showNotification('Chatbot analytics refreshed', 'success');
+}
+
+// Refresh conversations
+function refreshConversations() {
+    loadRecentConversations();
+    showNotification('Conversations refreshed', 'success');
+}
+
+// Export conversations
+async function exportConversations() {
+    try {
+        showNotification('Preparing export...', 'info');
+        
+        const authToken = localStorage.getItem('adminToken');
+        const response = await fetch(`${window.location.origin}/api/chatbot/analytics`, {
+            headers: {
+                'x-admin-token': authToken
+            }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Create CSV content
+            const csvContent = [
+                ['Metric', 'Value'],
+                ['Total Conversations', data.analytics.totalConversations],
+                ['Total Messages', data.analytics.totalMessages],
+                ['Average Messages per Conversation', data.analytics.averageMessagesPerConversation],
+                ['Average Satisfaction', data.analytics.averageSatisfaction],
+                [''],
+                ['Popular Topics', 'Count'],
+                ...data.analytics.popularTopics.map(t => [t.topic, t.count])
+            ].map(row => row.join(',')).join('\n');
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chatbot-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('Analytics exported successfully', 'success');
+        }
+    } catch (error) {
+        console.error('Error exporting conversations:', error);
+        showNotification('Failed to export conversations', 'error');
+    }
+}
+
+// Add navigation handler for chatbot view
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handler for chatbot nav link
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const view = this.dataset.view;
+            
+            if (view === 'chatbot') {
+                e.preventDefault();
+                
+                // Hide messages table
+                document.querySelector('.table-container').style.display = 'none';
+                
+                // Show chatbot section
+                document.getElementById('chatbotSection').style.display = 'block';
+                
+                // Update active nav
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Load chatbot analytics
+                loadChatbotAnalytics();
+            } else if (view === 'messages') {
+                e.preventDefault();
+                
+                // Show messages table
+                document.querySelector('.table-container').style.display = 'block';
+                
+                // Hide chatbot section
+                document.getElementById('chatbotSection').style.display = 'none';
+                
+                // Update active nav
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
+    });
+});

@@ -1195,3 +1195,696 @@ window.toggleMobileMenu = function () {
     APP_STATE.isMobileMenuOpen = true;
   }
 };
+
+// ==========================
+// AI-POWERED FEATURES
+// ==========================
+
+// Load AI Chat and Features
+function loadAIFeatures() {
+  // Create script elements for AI features
+  const aiChatScript = document.createElement('script');
+  aiChatScript.src = 'ai-chat.js';
+  aiChatScript.async = true;
+  document.head.appendChild(aiChatScript);
+
+  const aiFeaturesScript = document.createElement('script');
+  aiFeaturesScript.src = 'ai-features.js';
+  aiFeaturesScript.async = true;
+  document.head.appendChild(aiFeaturesScript);
+
+  console.log('🤖 AI features loaded successfully');
+}
+
+// AI-Powered Content Recommendations
+class AIContentRecommendations {
+  constructor() {
+    this.userInteractions = JSON.parse(localStorage.getItem('userInteractions')) || {};
+    this.recommendations = [];
+    this.init();
+  }
+
+  init() {
+    this.trackInteractions();
+    this.generateRecommendations();
+    this.displayRecommendations();
+  }
+
+  trackInteractions() {
+    // Track scroll depth
+    let maxScroll = 0;
+    window.addEventListener('scroll', () => {
+      const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      maxScroll = Math.max(maxScroll, scrollPercent);
+      this.userInteractions.maxScroll = maxScroll;
+      this.saveInteractions();
+    });
+
+    // Track section time
+    const sections = document.querySelectorAll('section[id]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          this.userInteractions.sectionTime = this.userInteractions.sectionTime || {};
+          this.userInteractions.sectionTime[sectionId] = Date.now();
+        }
+      });
+    });
+
+    sections.forEach(section => observer.observe(section));
+
+    // Track clicks
+    document.addEventListener('click', (e) => {
+      const element = e.target;
+      const clickData = {
+        tag: element.tagName,
+        class: element.className,
+        text: element.textContent?.substring(0, 30),
+        timestamp: Date.now()
+      };
+
+      this.userInteractions.clicks = this.userInteractions.clicks || [];
+      this.userInteractions.clicks.push(clickData);
+      
+      // Keep only last 50 clicks
+      if (this.userInteractions.clicks.length > 50) {
+        this.userInteractions.clicks = this.userInteractions.clicks.slice(-50);
+      }
+      
+      this.saveInteractions();
+    });
+  }
+
+  generateRecommendations() {
+    const interests = this.analyzeInterests();
+    this.recommendations = [];
+
+    // AI/ML interest
+    if (interests.ai > 0.3) {
+      this.recommendations.push({
+        type: 'project',
+        title: 'AI Recommender System',
+        description: 'Explore the intelligent recommendation engine built with Python and TensorFlow',
+        action: 'View AI Projects',
+        link: '#projects',
+        confidence: Math.round(interests.ai * 100)
+      });
+    }
+
+    // Technical skills interest
+    if (interests.technical > 0.4) {
+      this.recommendations.push({
+        type: 'skills',
+        title: 'Technical Expertise',
+        description: 'Dive deep into the technical skills and frameworks mastered',
+        action: 'Explore Skills',
+        link: '#skills',
+        confidence: Math.round(interests.technical * 100)
+      });
+    }
+
+    // Contact interest
+    if (interests.contact > 0.2 || this.userInteractions.maxScroll > 80) {
+      this.recommendations.push({
+        type: 'contact',
+        title: 'Ready to Connect?',
+        description: 'Start a conversation about your next project',
+        action: 'Get in Touch',
+        link: '#contact',
+        confidence: 85
+      });
+    }
+  }
+
+  analyzeInterests() {
+    const clicks = this.userInteractions.clicks || [];
+    const sectionTime = this.userInteractions.sectionTime || {};
+    
+    return {
+      ai: this.calculateInterest(clicks, ['ai', 'ml', 'intelligent', 'smart']) + 
+          (sectionTime.projects ? 0.2 : 0),
+      technical: this.calculateInterest(clicks, ['skill', 'tech', 'code', 'development']) + 
+                 (sectionTime.skills ? 0.3 : 0),
+      contact: this.calculateInterest(clicks, ['contact', 'hire', 'email']) + 
+               (sectionTime.contact ? 0.4 : 0)
+    };
+  }
+
+  calculateInterest(clicks, keywords) {
+    const relevantClicks = clicks.filter(click => 
+      keywords.some(keyword => 
+        click.text?.toLowerCase().includes(keyword) || 
+        click.class?.toLowerCase().includes(keyword)
+      )
+    );
+    return Math.min(relevantClicks.length / 10, 1);
+  }
+
+  displayRecommendations() {
+    if (this.recommendations.length === 0) return;
+
+    const container = document.createElement('div');
+    container.className = 'ai-recommendations-banner';
+    container.innerHTML = `
+      <div class="ai-rec-content">
+        <div class="ai-rec-header">
+          <span class="ai-badge">🤖 AI</span>
+          <h3>Personalized for You</h3>
+        </div>
+        <div class="ai-rec-items">
+          ${this.recommendations.slice(0, 2).map(rec => `
+            <div class="ai-rec-item" data-link="${rec.link}">
+              <div class="ai-rec-text">
+                <strong>${rec.title}</strong>
+                <p>${rec.description}</p>
+              </div>
+              <button class="ai-rec-btn">${rec.action}</button>
+            </div>
+          `).join('')}
+        </div>
+        <button class="ai-rec-close">×</button>
+      </div>
+    `;
+
+    document.body.appendChild(container);
+
+    // Add event listeners
+    container.querySelectorAll('.ai-rec-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const link = item.dataset.link;
+        document.querySelector(link)?.scrollIntoView({ behavior: 'smooth' });
+        container.remove();
+      });
+    });
+
+    container.querySelector('.ai-rec-close').addEventListener('click', () => {
+      container.remove();
+    });
+
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+      if (container.parentNode) {
+        container.remove();
+      }
+    }, 10000);
+  }
+
+  saveInteractions() {
+    localStorage.setItem('userInteractions', JSON.stringify(this.userInteractions));
+  }
+}
+
+// AI-Powered Smart Navigation
+class SmartNavigation {
+  constructor() {
+    this.navigationPatterns = JSON.parse(localStorage.getItem('navigationPatterns')) || {};
+    this.init();
+  }
+
+  init() {
+    this.addSmartSuggestions();
+    this.optimizeNavigation();
+  }
+
+  addSmartSuggestions() {
+    const nav = document.querySelector('.nav-menu');
+    if (!nav) return;
+
+    // Add smart navigation hints
+    const smartHints = document.createElement('div');
+    smartHints.className = 'smart-nav-hints';
+    smartHints.innerHTML = `
+      <div class="smart-hint" id="smart-hint">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">Try using Ctrl+K to search!</span>
+      </div>
+    `;
+
+    nav.appendChild(smartHints);
+
+    // Show hint occasionally
+    if (Math.random() > 0.7) {
+      setTimeout(() => {
+        const hint = document.getElementById('smart-hint');
+        if (hint) {
+          hint.style.display = 'flex';
+          setTimeout(() => {
+            hint.style.display = 'none';
+          }, 3000);
+        }
+      }, 5000);
+    }
+  }
+
+  optimizeNavigation() {
+    // Track most visited sections
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        const section = link.getAttribute('href').replace('#', '');
+        this.navigationPatterns[section] = (this.navigationPatterns[section] || 0) + 1;
+        localStorage.setItem('navigationPatterns', JSON.stringify(this.navigationPatterns));
+      });
+    });
+
+    // Highlight popular sections
+    this.highlightPopularSections();
+  }
+
+  highlightPopularSections() {
+    const sortedSections = Object.entries(this.navigationPatterns)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 2);
+
+    sortedSections.forEach(([section]) => {
+      const link = document.querySelector(`[href="#${section}"]`);
+      if (link) {
+        link.classList.add('popular-section');
+      }
+    });
+  }
+}
+
+// AI-Enhanced Contact Form
+class AIContactForm {
+  constructor() {
+    this.suggestions = {
+      'web development': 'I\'m interested in web development services',
+      'mobile app': 'I need help with mobile app development',
+      'ai project': 'I have an AI/ML project in mind',
+      'freelance': 'I\'m looking for freelance development work',
+      'consultation': 'I need technical consultation'
+    };
+    this.init();
+  }
+
+  init() {
+    const messageField = document.querySelector('#message');
+    if (!messageField) return;
+
+    this.addSmartSuggestions(messageField);
+    this.addAutoComplete(messageField);
+  }
+
+  addSmartSuggestions(messageField) {
+    const suggestionsContainer = document.createElement('div');
+    suggestionsContainer.className = 'ai-message-suggestions';
+    suggestionsContainer.innerHTML = `
+      <p>💡 Quick message templates:</p>
+      <div class="suggestion-chips">
+        ${Object.keys(this.suggestions).map(key => `
+          <button class="suggestion-chip" data-template="${key}">${key}</button>
+        `).join('')}
+      </div>
+    `;
+
+    messageField.parentNode.insertBefore(suggestionsContainer, messageField.nextSibling);
+
+    // Add click handlers
+    suggestionsContainer.querySelectorAll('.suggestion-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        const template = chip.dataset.template;
+        messageField.value = this.suggestions[template];
+        messageField.focus();
+      });
+    });
+  }
+
+  addAutoComplete(messageField) {
+    let timeout;
+    messageField.addEventListener('input', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        this.analyzeMessage(messageField.value);
+      }, 500);
+    });
+  }
+
+  analyzeMessage(message) {
+    const lowerMessage = message.toLowerCase();
+    let suggestion = '';
+
+    if (lowerMessage.includes('web') && lowerMessage.includes('site')) {
+      suggestion = 'It sounds like you need web development services. I can help with modern, responsive websites!';
+    } else if (lowerMessage.includes('mobile') || lowerMessage.includes('app')) {
+      suggestion = 'Mobile app development is one of my specialties. I work with Android and cross-platform solutions.';
+    } else if (lowerMessage.includes('ai') || lowerMessage.includes('machine learning')) {
+      suggestion = 'AI and ML projects are exciting! I have experience with Python, TensorFlow, and intelligent systems.';
+    }
+
+    if (suggestion) {
+      this.showSuggestion(suggestion);
+    }
+  }
+
+  showSuggestion(suggestion) {
+    // Remove existing suggestion
+    const existing = document.querySelector('.ai-form-suggestion');
+    if (existing) existing.remove();
+
+    const suggestionDiv = document.createElement('div');
+    suggestionDiv.className = 'ai-form-suggestion';
+    suggestionDiv.innerHTML = `
+      <div class="suggestion-content">
+        <span class="suggestion-icon">🤖</span>
+        <p>${suggestion}</p>
+        <button class="suggestion-dismiss">×</button>
+      </div>
+    `;
+
+    const form = document.querySelector('#contactForm');
+    if (form) {
+      form.appendChild(suggestionDiv);
+
+      suggestionDiv.querySelector('.suggestion-dismiss').addEventListener('click', () => {
+        suggestionDiv.remove();
+      });
+
+      // Auto-hide after 8 seconds
+      setTimeout(() => {
+        if (suggestionDiv.parentNode) {
+          suggestionDiv.remove();
+        }
+      }, 8000);
+    }
+  }
+}
+
+// Initialize AI Features
+function initializeAI() {
+  console.log('🤖 Initializing AI features...');
+  
+  // Load external AI scripts
+  loadAIFeatures();
+  
+  // Initialize AI components
+  new AIContentRecommendations();
+  new SmartNavigation();
+  new AIContactForm();
+  
+  console.log('✅ AI features initialized successfully');
+}
+
+// Add AI styles
+const aiStyles = `
+<style>
+/* AI Recommendations Banner */
+.ai-recommendations-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  z-index: 999;
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ai-rec-content {
+  position: relative;
+}
+
+.ai-rec-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.ai-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.ai-rec-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.ai-rec-items {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.ai-rec-item {
+  flex: 1;
+  min-width: 250px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-rec-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.ai-rec-text strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.ai-rec-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.ai-rec-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ai-rec-btn:hover {
+  transform: scale(1.05);
+}
+
+.ai-rec-close {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smart Navigation Hints */
+.smart-nav-hints {
+  position: relative;
+}
+
+.smart-hint {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: none;
+  align-items: center;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.smart-hint::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 20px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #333;
+}
+
+.popular-section {
+  position: relative;
+}
+
+.popular-section::after {
+  content: '🔥';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 12px;
+}
+
+/* AI Message Suggestions */
+.ai-message-suggestions {
+  margin: 10px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.ai-message-suggestions p {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.suggestion-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggestion-chip {
+  background: #e9ecef;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.suggestion-chip:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* AI Form Suggestions */
+.ai-form-suggestion {
+  margin-top: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.suggestion-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.suggestion-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.suggestion-content p {
+  margin: 0;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.suggestion-dismiss {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .ai-recommendations-banner {
+    left: 10px;
+    right: 10px;
+    padding: 15px;
+  }
+  
+  .ai-rec-items {
+    flex-direction: column;
+  }
+  
+  .ai-rec-item {
+    min-width: auto;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .suggestion-chips {
+    justify-content: center;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-message-suggestions {
+    background: #2d2d2d;
+    border-color: #444;
+    color: white;
+  }
+  
+  .ai-message-suggestions p {
+    color: #ccc;
+  }
+  
+  .suggestion-chip {
+    background: #444;
+    color: #ccc;
+  }
+  
+  .suggestion-chip:hover {
+    background: #667eea;
+    color: white;
+  }
+}
+</style>
+`;
+
+document.head.insertAdjacentHTML('beforeend', aiStyles);
+
+// Initialize AI when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeAI);
+} else {
+  initializeAI();
+}
