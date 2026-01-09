@@ -637,6 +637,7 @@ p {
   font-size: 0.9rem;
   font-weight: 600;
   transition: all 0.3s ease;
+  color: #ffffff;
 }
 
 .availability-badge {
@@ -647,6 +648,28 @@ p {
   );
   border-color: rgba(16, 185, 129, 0.3);
   animation: pulse-glow-green 2s ease-in-out infinite;
+  color: #ffffff;
+}
+
+.availability-badge span {
+  color: #ffffff;
+}
+
+.badge-text {
+  color: inherit;
+}
+
+/* Light theme badge text */
+body.light .badge-text {
+  color: #1a202c !important;
+}
+
+body.light .availability-badge .badge-text {
+  color: #047857 !important;
+}
+
+body.light .response-badge .badge-text {
+  color: #4338ca !important;
 }
 
 .status-dot {
@@ -861,7 +884,7 @@ p {
 
 /* Stats Section */
 .stats-section {
-  padding: 5rem 0;
+  padding: 3rem 0;
   background: transparent;
   position: relative;
 }
@@ -919,7 +942,7 @@ p {
 /* Section Styles */
 .section-header {
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: 3rem;
 }
 
 .section-badge {
@@ -936,7 +959,7 @@ p {
 }
 
 .section-title {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .section-description {
@@ -948,7 +971,7 @@ p {
 
 /* About Section */
 .about-section {
-  padding: 8rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -1120,16 +1143,46 @@ p {
 
 .highlight-content h3 {
   margin-bottom: 0.5rem;
+  color: #ffffff !important;
+  font-weight: 600;
 }
 
 .highlight-content p {
   font-size: 1rem;
-  color: var(--foreground-light);
+  color: #cbd5e0 !important;
+}
+
+/* Light theme highlight cards */
+body.light .highlight-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .highlight-content h3 {
+  color: #1a202c !important;
+}
+
+body.light .highlight-content p {
+  color: #4a5568 !important;
+}
+
+/* Dark theme highlight cards */
+body.dark .highlight-card {
+  background: rgba(30, 30, 40, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark .highlight-content h3 {
+  color: #ffffff !important;
+}
+
+body.dark .highlight-content p {
+  color: #cbd5e0 !important;
 }
 
 /* Skills Section */
 .skills-section {
-  padding: 8rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -1222,7 +1275,7 @@ p {
 
 /* Projects Section */
 .projects-section {
-  padding: 8rem 0;
+  padding: 4rem 0;
   background: transparent;
 }
 
@@ -1344,7 +1397,7 @@ p {
 
 /* Testimonials Section */
 .testimonials-section {
-  padding: 8rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -1431,7 +1484,7 @@ p {
 
 /* Contact Section */
 .contact-section {
-  padding: 8rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -1627,7 +1680,7 @@ p {
 
 /* CTA Section */
 .cta-section {
-  padding: 6rem 0;
+  padding: 3rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -2054,7 +2107,7 @@ button.loading::after {
    Services Section
    ========================== */
 .services-section {
-  padding: 6rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -2178,7 +2231,7 @@ button.loading::after {
    Education Section
    ========================== */
 .education-section {
-  padding: 6rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -2317,7 +2370,7 @@ button.loading::after {
    Blog Section
    ========================== */
 .blog-section {
-  padding: 6rem 0;
+  padding: 4rem 0;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -2540,61 +2593,360 @@ button.loading::after {
   box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
 }
 
+/* Light theme toggle styling */
+body.light .theme-toggle {
+  border-color: rgba(102, 126, 234, 0.3);
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+body.light .theme-toggle:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
 .theme-toggle svg {
   width: 20px;
   height: 20px;
 }
 
-/* Theme variations - Change accent colors AND animated background */
+/* Theme variations - Light and Dark themes */
 /* Default dark theme (no class) uses colors from :root */
 
-/* Ocean Blue Theme */
-body.blue {
-  --primary: #0ea5e9;
+/* Light Theme (White Background) */
+body.light {
+  --primary: #667eea;
   --cyan: #06b6d4;
   --blue: #3b82f6;
   --purple: #6366f1;
-  --pink: #8b5cf6;
-  --foreground: #ffffff;
-  --foreground-light: #e0f2fe;
-  --foreground-lighter: #bae6fd;
-  --background: #0c4a6e;
-  --background-light: #075985;
-  --border: rgba(255, 255, 255, 0.15);
-  background: linear-gradient(-45deg, #0c4a6e, #075985, #0369a1, #0284c7);
+  --pink: #ec4899;
+  --foreground: #1a202c;
+  --foreground-light: #2d3748;
+  --foreground-lighter: #4a5568;
+  --background: #ffffff;
+  --background-light: #f7fafc;
+  --border: rgba(0, 0, 0, 0.1);
+  background: linear-gradient(-45deg, #ffffff, #f7fafc, #edf2f7, #e2e8f0);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
-  color: #ffffff;
+  color: #1a202c;
 }
 
-body.blue::before {
+body.light::before {
   background: radial-gradient(
       circle at 20% 50%,
-      rgba(14, 165, 233, 0.15) 0%,
+      rgba(102, 126, 234, 0.05) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 80% 80%,
-      rgba(6, 182, 212, 0.12) 0%,
+      rgba(59, 130, 246, 0.04) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 40% 20%,
-      rgba(59, 130, 246, 0.08) 0%,
+      rgba(236, 72, 153, 0.03) 0%,
       transparent 50%
     );
 }
 
-body.blue::after {
+body.light::after {
   background-image: linear-gradient(
-      rgba(14, 165, 233, 0.05) 1px,
+      rgba(102, 126, 234, 0.03) 1px,
       transparent 1px
     ),
-    linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(102, 126, 234, 0.03) 1px, transparent 1px);
 }
 
-/* Dark Theme (Black) */
-body.black {
+/* Light theme specific overrides - Complete visibility fixes */
+body.light {
+  color: #1a202c !important;
+}
+
+body.light h1,
+body.light h2,
+body.light h3,
+body.light h4,
+body.light h5,
+body.light h6 {
+  color: #1a202c !important;
+}
+
+body.light p,
+body.light span,
+body.light div,
+body.light li,
+body.light a {
+  color: #2d3748;
+}
+
+/* Hero badge text must be visible in light theme - override general span rule */
+body.light .hero-badge,
+body.light .hero-badges-container .hero-badge,
+body.light .hero-badges-container .availability-badge,
+body.light .hero-badges-container .response-badge {
+  color: #1a202c !important;
+}
+
+body.light .hero-badge span,
+body.light .hero-badges-container .hero-badge span,
+body.light .hero-badges-container .availability-badge span,
+body.light .hero-badges-container .response-badge span {
+  color: #047857 !important;
+}
+
+body.light .navbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .logo {
+  color: #667eea !important;
+}
+
+body.light .nav-link {
+  color: #4a5568 !important;
+}
+
+body.light .nav-link:hover,
+body.light .nav-link.active {
+  color: #667eea !important;
+}
+
+body.light .hero-title {
+  color: #1a202c !important;
+}
+
+body.light .hero-description,
+body.light .hero-subtitle {
+  color: #4a5568 !important;
+}
+
+body.light .gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.light .section-title {
+  color: #1a202c !important;
+}
+
+body.light .section-description {
+  color: #4a5568 !important;
+}
+
+body.light .stat-value {
+  color: #1a202c !important;
+}
+
+body.light .stat-label {
+  color: #4a5568 !important;
+}
+
+body.light .stat-card,
+body.light .skill-card,
+body.light .service-card,
+body.light .project-card,
+body.light .blog-card,
+body.light .testimonial-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  color: #2d3748;
+}
+
+body.light .project-title,
+body.light .blog-title,
+body.light .service-title {
+  color: #1a202c !important;
+}
+
+body.light .project-description,
+body.light .blog-excerpt,
+body.light .service-description {
+  color: #4a5568 !important;
+}
+
+body.light .project-tag,
+body.light .badge {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea !important;
+}
+
+body.light .contact-form-container,
+body.light .contact-info {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .contact-info h3 {
+  color: #1a202c !important;
+}
+
+body.light .contact-text,
+body.light .detail-label,
+body.light .detail-value {
+  color: #4a5568 !important;
+}
+
+body.light .form-control {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  color: #1a202c !important;
+}
+
+body.light .form-control::placeholder {
+  color: #a0aec0;
+}
+
+body.light .form-control:focus {
+  border-color: var(--primary);
+}
+
+body.light label {
+  color: #2d3748 !important;
+}
+
+/* Hero badges light theme */
+body.light .hero-badge {
+  background: rgba(102, 126, 234, 0.15) !important;
+  border: 2px solid rgba(102, 126, 234, 0.4) !important;
+  color: #1a202c !important;
+}
+
+body.light .hero-badge span {
+  color: #1a202c !important;
+}
+
+body.light .hero-badges-container .hero-badge {
+  color: #1a202c !important;
+}
+
+body.light .hero-badges-container .hero-badge span {
+  color: #1a202c !important;
+}
+
+body.light .availability-badge {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)) !important;
+  border: 2px solid rgba(16, 185, 129, 0.5) !important;
+}
+
+body.light .availability-badge span {
+  color: #047857 !important;
+  font-weight: 600 !important;
+}
+
+body.light .hero-badges-container .availability-badge span {
+  color: #047857 !important;
+}
+
+body.light .availability-badge .status-dot {
+  background: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3) !important;
+}
+
+body.light .response-badge {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(139, 92, 246, 0.2)) !important;
+  border: 2px solid rgba(102, 126, 234, 0.5) !important;
+}
+
+body.light .response-badge span {
+  color: #4338ca !important;
+  font-weight: 600 !important;
+}
+
+body.light .hero-badges-container .response-badge span {
+  color: #4338ca !important;
+}
+
+body.light .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+body.light .btn-secondary {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+  color: #1a202c !important;
+  border: 2px solid #667eea;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+body.light .btn-secondary:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff !important;
+}
+
+body.light .btn-outline {
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px solid #667eea;
+  color: #1a202c !important;
+}
+
+body.light .btn-outline:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff !important;
+}
+
+body.light .hero-buttons .btn {
+  color: #1a202c !important;
+}
+
+body.light .hero-buttons .btn-primary {
+  color: #ffffff !important;
+}
+
+body.light .footer {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light .footer-logo,
+body.light .footer-copyright {
+  color: #2d3748 !important;
+}
+
+body.light .footer-links a {
+  color: #4a5568 !important;
+}
+
+body.light .footer-links a:hover {
+  color: #667eea !important;
+}
+
+body.light .testimonial-content {
+  color: #4a5568 !important;
+}
+
+body.light .author-name {
+  color: #1a202c !important;
+}
+
+body.light .author-role {
+  color: #718096 !important;
+}
+
+body.light .blog-meta,
+body.light .blog-date,
+body.light .blog-read-time {
+  color: #718096 !important;
+}
+
+body.light .skill-name,
+body.light .skill-level {
+  color: #2d3748 !important;
+}
+
+/* Dark Theme (Black Background) */
+body.dark {
+  --primary: #00f5ff;
+  --cyan: #00f5ff;
+  --blue: #0ea5e9;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
   --foreground: #ffffff;
   --foreground-light: #e5e7eb;
   --foreground-lighter: #f3f4f6;
@@ -2604,10 +2956,10 @@ body.black {
   background: linear-gradient(-45deg, #000000, #0a0a0a, #050505, #0f0f0f);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
-body.black::before {
+body.dark::before {
   background: radial-gradient(
       circle at 20% 50%,
       rgba(0, 245, 255, 0.1) 0%,
@@ -2623,6 +2975,59 @@ body.black::before {
       rgba(236, 72, 153, 0.06) 0%,
       transparent 50%
     );
+}
+
+body.dark::after {
+  background-image: linear-gradient(
+      rgba(0, 245, 255, 0.03) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Dark theme text visibility */
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark h4,
+body.dark h5,
+body.dark h6 {
+  color: #ffffff !important;
+}
+
+body.dark p,
+body.dark span,
+body.dark div,
+body.dark li {
+  color: #e5e7eb;
+}
+
+body.dark a {
+  color: #00f5ff;
+}
+
+body.dark .hero-description,
+body.dark .hero-subtitle,
+body.dark .section-description,
+body.dark .stat-label,
+body.dark .project-description,
+body.dark .blog-excerpt,
+body.dark .service-description {
+  color: #cbd5e0 !important;
+}
+
+body.dark .form-control {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+}
+
+body.dark .form-control::placeholder {
+  color: #718096;
+}
+
+body.dark label {
+  color: #e5e7eb !important;
 }
 
 body.theme-purple {

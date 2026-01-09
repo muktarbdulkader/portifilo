@@ -16,7 +16,7 @@ const CONFIG = {
 const APP_STATE = {
   isMobileMenuOpen: false,
   isBackendConnected: false,
-  activeTheme: 'blue',
+  activeTheme: 'dark',
   activeFilter: 'all',
   particlesEnabled: true,
   mouseTrailEnabled: false,
@@ -584,21 +584,21 @@ function createMouseTrailParticle(x, y) {
 // ==========================
 function loadSavedTheme() {
   const savedTheme = localStorage.getItem("portfolioTheme");
-  const themes = ["blue", "black"];
+  const themes = ["light", "dark"];
 
   if (savedTheme && themes.includes(savedTheme)) {
     document.body.classList.add(savedTheme);
     APP_STATE.activeTheme = savedTheme;
   } else {
-    document.body.classList.add("blue");
-    APP_STATE.activeTheme = "blue";
+    document.body.classList.add("dark");
+    APP_STATE.activeTheme = "dark";
   }
 }
 
 function initializeThemeToggle() {
   if (!DOM.themeToggle) return;
 
-  const themes = ["blue", "black"];
+  const themes = ["light", "dark"];
 
   DOM.themeToggle.addEventListener("click", () => {
     // Remove current theme
@@ -634,8 +634,8 @@ function initializeThemeToggle() {
 
 function showThemeToast(theme) {
   const themeNames = {
-    blue: "Ocean Blue Theme",
-    black: "Dark Theme"
+    light: "Light Theme ☀️",
+    dark: "Dark Theme 🌙"
   };
 
   const toast = document.createElement("div");
@@ -644,7 +644,7 @@ function showThemeToast(theme) {
     <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
     </svg>
-    <span>${themeNames[theme] || "Theme"} activated! 🎨</span>
+    <span>${themeNames[theme] || "Theme"} activated!</span>
   `;
   document.body.appendChild(toast);
 
@@ -977,7 +977,7 @@ function initializeDownloadCV() {
 
     // Open CV in new tab
     setTimeout(() => {
-      window.open("image/MUKTAR-ABDULKADER.pdf", "_blank");
+      window.open("image/muktar abdulkader_cv.pdf", "_blank");
     }, 500);
   });
 }
