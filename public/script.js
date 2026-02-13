@@ -84,6 +84,11 @@ function initializeApp() {
   // Load saved theme
   loadSavedTheme();
 
+  // Ensure page is scrollable
+  document.body.style.overflow = "";
+  document.body.style.overflowX = "hidden";
+  document.body.style.overflowY = "auto";
+
   // Initialize components
   initializeNavigation();
   initializeScrollEffects();
