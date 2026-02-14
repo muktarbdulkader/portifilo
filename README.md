@@ -347,6 +347,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## 🎨 Other Projects
+
+### NextGen ERP Ethiopia
+**Enterprise Resource Planning System for Ethiopian Businesses**
+
+A comprehensive ERP solution designed specifically for Ethiopian businesses, featuring:
+- 📊 Financial Management & Accounting
+- 📦 Inventory & Supply Chain Management
+- 👥 Human Resource Management
+- 💰 Payroll & Tax Compliance
+- 📈 Business Intelligence & Reporting
+- 🌍 Multi-language Support (Amharic, English)
+- 💱 Ethiopian Birr (ETB) Currency Support
+- 📱 Mobile-responsive Design
+
+**Tech Stack**: Node.js, Express, MongoDB, React, Material-UI
+
+🔗 [View Project](https://github.com/muktarbdulkader/nextgen-erp-ethiopia)
+
+---
+
 ## 🙏 Acknowledgments
 
 - Express.js for the backend framework
